@@ -1,0 +1,701 @@
+############
+# author: Kent O'Sullivan
+# purpose: The Cyber Simulation Terrain is the Independent Network Model use to support the CESO in representing Cyber Effects
+# worldview: Assumes omniscience of modelled network. View is focused on describing connections and interrelations. 
+# If you use this work please reference: 
+# O’Sullivan, K and Turnbull, B (2015). The Cyber Simulation Terrain: Towards an Open Source Cyber Effects Simulation Ontology. Accepted for the 16th Australian Information Warfare Conference in Perth, Western Australia, Australia 30 Nov – 02 Dec. 
+############
+
+#     _______     ______  ______ _____     _____ _____ __  __ _    _ _            _______ _____ ____  _   _   _______ ______ _____  _____            _____ _   _ 
+#    / ____\ \   / /  _ \|  ____|  __ \   / ____|_   _|  \/  | |  | | |        /\|__   __|_   _/ __ \| \ | | |__   __|  ____|  __ \|  __ \     /\   |_   _| \ | |
+#   | |     \ \_/ /| |_) | |__  | |__) | | (___   | | | \  / | |  | | |       /  \  | |    | || |  | |  \| |    | |  | |__  | |__) | |__) |   /  \    | | |  \| |
+#   | |      \   / |  _ <|  __| |  _  /   \___ \  | | | |\/| | |  | | |      / /\ \ | |    | || |  | | . ` |    | |  |  __| |  _  /|  _  /   / /\ \   | | | . ` |
+#   | |____   | |  | |_) | |____| | \ \   ____) |_| |_| |  | | |__| | |____ / ____ \| |   _| || |__| | |\  |    | |  | |____| | \ \| | \ \  / ____ \ _| |_| |\  |
+#    \_____|  |_|  |____/|______|_|  \_\ |_____/|_____|_|  |_|\____/|______/_/    \_\_|  |_____\____/|_| \_|    |_|  |______|_|  \_\_|  \_\/_/    \_\_____|_| \_|
+#                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
+@prefix core:    	<http://www.accs.unsw.adfa.edu.au/2015/09/05/core/core#> .
+@prefix cst:   		<http://www.accs.unsw.adfa.edu.au/2015/09/05/domain/cyber/CyberSimulationTerrain/cst#> .
+
+@prefix rdf:     	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:     	<http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:    	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:		<http://www.w3.org/2002/07/owl#> .
+
+#     ____   _          _      ____    ____    _____   ____  
+#    / ___| | |        / \    / ___|  / ___|  | ____| / ___| 
+#   | |     | |       / _ \   \___ \  \___ \  |  _|   \___ \ 
+#   | |___  | |___   / ___ \   ___) |  ___) | | |___   ___) |
+#    \____| |_____| /_/   \_\ |____/  |____/  |_____| |____/ 
+#                                                            
+
+#Classes relating to basic nodes and connection 
+
+cst:Node 
+	rdf:type rdfs:Class ;
+	rdfs:comment "A node on a network. SuperClass, use subClasses where appropriate"^^xsd:string ;
+	rdfs:label "Network Node"^^xsd:string .
+
+cst:Computer
+  	rdf:type rdfs:Class ;
+  	rdfs:comment "Computer object"^^xsd:string ;
+  	rdfs:label "Computer"^^xsd:string ;
+  	rdfs:subClassOf cst:Node .
+
+ cst:Router
+  	rdf:type rdfs:Class ;
+  	rdfs:comment "Router is a specialised type of computer for routing traffic between networks."^^xsd:string ;
+  	rdfs:label "Router"^^xsd:string ;
+  	rdfs:subClassOf cst:Computer .
+
+cst:Nic
+	rdf:type rdfs:Class ;
+	rdfs:comment "Component of computer that enables network connectivity. Computer can have 0 to many. Has MAC and IP properties."^^xsd:string ;
+	rdfs:label "Network Interface Card"^^xsd:string .	
+
+
+# Classes relating to Networking and comminications between nodes
+
+cst:Network
+	rdf:type rdfs:Class ;
+	rdfs:comment "Collection of computer objects. Has a Unique Name"^^xsd:string ;
+	rdfs:label "Network"^^xsd:string .
+
+cst:SubNetwork
+	rdf:type rdfs:Class ;
+	rdfs:comment "Collection of computer objects. Used to connect endpoint workstations"^^xsd:string ;
+	rdfs:label "SubNetwork"^^xsd:string ;
+	rdfs:subClassOf cst:Network .
+
+cst:InterNetwork
+	rdf:type rdfs:Class ;
+	rdfs:comment "Collection of ROUTER objects. USed to connect disparate networks"^^xsd:string ;
+	rdfs:label "InterNetwork"^^xsd:string ;
+	rdfs:subClassOf cst:Network .
+
+cst:Route 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Path from one network edge node to another within a router. Has properties of routeNumber, From and To"^^xsd:string ;
+	rdfs:label "Route"^^xsd:string .
+
+cst:Internet 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Internet is a per-node property. If a Node with a NIC is connected to a subnet with an edgeNic conected to a router with a route to the internet which is connected to the internet then internet connectivity is inferred. "^^xsd:string ;
+	rdfs:label "Internet"^^xsd:string ;
+	rdfs:subClassOf cst:Network .		
+
+
+#Classes to do with Wireless
+
+cst:WirelessAccessPoint
+	rdf:type rdfs:Class ;
+	rdfs:comment "Wireless access point will permit wireless access to a conected subnet. Will have an associated Wireless Encryption Standard"^^xsd:string ;
+	rdfs:label "Wireless Access Point" .
+
+cst:WirelessSecurityProtocol
+	rdf:type rdfs:Class ;
+	rdfs:comment "Security Protocol used to protect a wireless network. Will have A type and a strength."^^xsd:string ;
+	rdfs:label "Wireless Security Protocol" .
+
+
+cst:WirelessNic
+	rdf:type rdfs:Class ;
+	rdfs:comment "Component of computer that enables wireless network connectivity. Computer can have 0 to many. Has MAC and IP properties."^^xsd:string ;
+	rdfs:label "Wireless Network Interface Card"^^xsd:string ;	
+	rdfs:subClassOf cst:Nic .
+
+
+#Classes to Do with Virtualisation
+
+cst:VirtualNetwork
+	rdf:type rdfs:Class ;
+	rdfs:comment "Collection of Virtual computer objects. Used to connect virtual machines to each other and to physical workstations"^^xsd:string ;
+	rdfs:label "Virtual Network"^^xsd:string ;
+	rdfs:subClassOf cst:Network .	
+
+cst:VirtualNic
+	rdf:type rdfs:Class ;
+	rdfs:comment "Component of computer that enables network connectivity with a virtual machine. Virtual machines MUST use a VNic. Physical machines must have a VNIC to interact with Virtual machine. Has MAC and IP properties."^^xsd:string ;
+	rdfs:label "Virtual Network Interface Card"^^xsd:string ;	
+	rdfs:subClassOf cst:Nic .	
+
+ cst:VirtualMachine
+  	rdf:type rdfs:Class ;
+  	rdfs:comment "A virtual Computer Object. Must be hosted on a physical computer ."^^xsd:string ;
+  	rdfs:label "Virtual Machine"^^xsd:string ;
+  	rdfs:subClassOf cst:Node .
+
+
+# The follwoing Classes relate to software and services. 
+
+cst:SoftwareType
+	rdf:type rdfs:Class ;
+	rdfs:comment "Software Class - use to define applications or operating systems. Use InstalledSoftwareVersion to Instantiate to a Node"^^xsd:string ;
+	rdfs:label "Software Type"^^xsd:string .
+
+cst:InstalledSoftwareVersion
+	rdf:type rdfs:Class ;
+	rdfs:comment "Used to define a particular version of software. Will operate as a particular privilege level. Has a version number. Runs on a node."^^xsd:string ;
+	rdfs:label "Installed Software Version"^^xsd:string .
+
+cst:SoftwareVulnerability
+	rdf:type rdfs:Class ;
+	rdfs:comment "Enumerates a vulnerability in a particular software version. Will have a CVE ID. "^^xsd:string ;
+	rdfs:label "Software Vulnerability"^^xsd:string .
+
+cst:SoftwareWeakness
+	rdf:type rdfs:Class ;
+	rdfs:comment "Categorisation of Vulnerability into an area of weakness based on CWE. Links to the Vulnerability CVE."^^xsd:string ;
+	rdfs:label "Software Weakness"^^xsd:string .
+
+cst:Service 
+	rdf:type rdfs:Class ;
+	rdfs:comment "The manifestation of a running software version on a computer system (SuperClass - use subClasses)"^^xsd:string ;
+	rdfs:label "Service"^^xsd:string .
+
+cst:LocalService
+	rdf:type rdfs:Class ;
+	rdfs:comment "A Service local to a computer system with no network projection. Inherits privilege level from parent Class. "^^xsd:string ;
+	rdfs:label "Local Service"^^xsd:string ;
+	rdfs:subClassOf cst:Service .
+
+cst:RemoteService 	
+	rdf:type rdfs:Class ;
+	rdfs:comment "A Service accessible remotely - projects itself over a NIC to a network on a port"^^xsd:string ;
+	rdfs:label "Remote Service"^^xsd:string ;
+	rdfs:subClassOf cst:Service .
+
+cst:SoftwareConfiguration
+	rdf:type rdfs:Class ;
+	rdfs:comment "A configuration item specific to a piece of software."^^xsd:string ;
+	rdfs:label "Software Configuration"^^xsd:string .	
+
+
+# The Following Classes are to Do with Domains and Users
+
+cst:Domain 
+	rdf:type rdfs:Class ;
+	rdfs:comment "A Domain is a distinct collection of computers, subnets and peripherals sharing the same domain name and sharing resources."^^xsd:string ;
+	rdfs:label "Domain" .
+
+cst:DomainController
+	rdf:type rdfs:Class ;
+	rdfs:comment "Special Instance of a Node - enables a domain to exist on any subnet it is linked to. Will still be a member of a subnet. If domain has multiple subnets, subordinate, nested subents will be used."^^xsd:string ;
+	rdfs:label "Domain Controller"^^xsd:string ;
+	rdfs:subClassOf cst:Node .
+
+cst:User
+	rdf:type rdfs:Class ;
+	rdfs:comment "The Virtual Persona of a physical user. Used to control access to resources and authentication. Users will have an ID, Username and Password. SuperClass, Use SubClasses"^^xsd:string ;
+	rdfs:label "User"^^xsd:string .
+
+cst:DomainUser
+	rdf:type rdfs:Class ;
+	rdfs:comment "User account on a given domain"^^xsd:string ;
+	rdfs:label "Domain User"^^xsd:string ;
+	rdfs:subClassOf cst:User .
+
+cst:LocalUser
+	rdf:type rdfs:Class ;
+	rdfs:comment "User account on a given domain"^^xsd:string ;
+	rdfs:label "Local User"^^xsd:string ;
+	rdfs:subClassOf cst:User .
+
+
+##The Following Classes are to do with data, disks and encryption 
+
+cst:Disk 
+	rdf:type rdfs:Class ;
+	rdfs:comment "A Hard disk belonging to a computer. Used to Store Data. Includes HDD, SSD etc. Can have protections such as Encryption"^^xsd:string ;
+	rdfs:label "Disk"^^xsd:string .
+
+cst:Data 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Data is the inforamation stored on a Disk. It is owned by a user and will be of a specific size and nature. Should refer onlt to user and application data Doesn't include program files etc."^^xsd:string ;
+	rdfs:label "Data"^^xsd:string .	
+
+cst:Encryption 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Defines the types of at-rest disk encryption available to a disk"^^xsd:string ;
+	rdfs:label "Encryption" .
+
+
+#Classes Relating to IDS
+
+cst:NetworkIDS 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Network Intrusion Detection System. Specialised Computer objNodeect that monitors a network for malicious traffic. Defined as computer to allow access to NIDS software for consistency. Not in posession of network card to reflect assumption that it is integrated into network switch / interface. "^^xsd:string ;
+	rdfs:label "Network Intrusion Detection System "^^xsd:string ;
+	rdfs:subClassOf cst:Node .
+
+cst:IdsRule 
+	rdf:type rdfs:Class ;
+	rdfs:comment "Intrusion Detection System Rule. A Specialised Configuration Item that is used to tune IDS'. Has properties of RuleID, Signature and Action. Currently not capable of Anomaly Detection"^^xsd:string ;
+	rdfs:label "Intrusion Detection System Rule"^^xsd:string ;	
+	rdfs:subClassOf cst:SoftwareConfiguration .	
+
+
+#    ____    ____     ___    ____    _____   ____    _____   ___   _____   ____  
+#   |  _ \  |  _ \   / _ \  |  _ \  | ____| |  _ \  |_   _| |_ _| | ____| / ___| 
+#   | |_) | | |_) | | | | | | |_) | |  _|   | |_) |   | |    | |  |  _|   \___ \ 
+#   |  __/  |  _ <  | |_| | |  __/  | |___  |  _ <    | |    | |  | |___   ___) |
+#   |_|     |_| \_\  \___/  |_|     |_____| |_| \_\   |_|   |___| |_____| |____/ 
+#                                                                                
+
+# Properties relating to Hardware and computers
+
+cst:hostName
+	rdf:type rdf:Property ;
+	rdfs:comment "Host Name of a given Computer"^^xsd:string ;
+	rdfs:label "Host Name"^^xsd:string ;
+	rdfs:domain cst:Computer ;
+	rdfs:range xsd:string . 
+
+cst:ipAddress
+	rdf:type rdf:Property ;
+	rdfs:comment "IP address of a network card"^^xsd:string ;
+	rdfs:label "IP Address"^^xsd:string ;
+	rdfs:domain cst:Nic ;
+	rdfs:range xsd:string . 
+
+
+cst:macAddress
+	rdf:type rdf:Property ;
+	rdfs:comment "MAC address of a network card"^^xsd:string ;
+	rdfs:label "MAC Address"^^xsd:string ;
+	rdfs:domain cst:Nic ;
+	rdfs:range xsd:string . 
+
+
+# Properties relating to networks
+
+cst:netname
+	rdf:type rdf:Property ;
+	rdfs:comment "Unique name of a given network"^^xsd:string ;
+	rdfs:label "Network Name"^^xsd:string ;
+	rdfs:domain cst:Network ;
+	rdfs:range xsd:string .
+
+cst:routeNumber
+	rdf:type rdf:Property ;
+	rdfs:comment "Unique number of a route"^^xsd:string ;
+	rdfs:label "Route Number"^^xsd:string ;
+	rdfs:domain cst:Route ;
+	rdfs:range xsd:integer .
+
+
+# Properties Relating to Wireless
+
+cst:ssid 	
+	rdf:type rdf:Property ;
+	rdfs:comment "Set Service Identifier. 32 Character unique identifier of Wireless Networks"^^xsd:string ;
+	rdfs:label "SSID"^^xsd:string ;
+	rdfs:domain cst:WirelessAccessPoint ;
+	rdfs:range xsd:string .
+
+cst:wirelessSecurityProtocolType	
+	rdf:type rdf:Property ;
+	rdfs:comment "Type for wireless security protocol"^^xsd:string ;
+	rdfs:label "Wireless Security Protocol Type"^^xsd:string ;
+	rdfs:domain cst:WirelessSecurityProtocol ;
+	rdfs:range xsd:string .	
+
+cst:wirelessSecurityProtocolStrength
+	rdf:type rdf:Property ;
+	rdfs:comment "Strength of the wireless security protocol"^^xsd:string ;
+	rdfs:label "Wireless Security Protocol Strength"^^xsd:string ;
+	rdfs:domain cst:WirelessSecurityProtocol ;
+	rdfs:range xsd:string .	
+
+
+# Properties relating to software and services
+
+cst:softwareName
+	rdf:type rdf:Property ;
+	rdfs:comment "Name of a piece of software. Will be determined by truncating the CPE ID before the Version."^^xsd:string ;
+	rdfs:label "Software Name"^^xsd:string ;
+	rdfs:domain cst:Software ;
+	rdfs:range xsd:string .
+
+cst:InstalledSoftwareVersionNumber
+	rdf:type rdf:Property ;
+	rdfs:comment "Version number associated with a particular software version. Determined by extracting version number from CPE-ID"^^xsd:string ;
+	rdfs:label "Software Version Number" ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range xsd:string .		
+
+cst:cpeIdentifier
+	rdf:type rdf:Property ;
+	rdfs:comment "Common Platform Enumeration Identifier. "^^xsd:string ;
+	rdfs:label "Common Platform Enumeration Identifier" ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range xsd:string .			
+
+cst:servicePrivelegeLevel
+	rdf:type rdf:Property ;
+	rdfs:comment "Defined privilege level that the service is operating at. Define as USER, ADMINISTRATOR or SYSTEM"^^xsd:string ;
+	rdfs:label "Service Privelege Level"^^xsd:string ;
+	rdfs:domain cst:Service ;
+	rdfs:range xsd:string .
+
+cst:port 
+	rdf:type rdf:Property ;
+	rdfs:comment "Port that a remote service is running on "^^xsd:string ;
+	rdfs:label "Port"^^xsd:string ;
+	rdfs:domain cst:RemoteService ;
+	rdfs:range xsd:int .
+
+cst:protocol
+	rdf:type rdf:Property ;
+	rdfs:comment "Protocol that a remote service operates using "^^xsd:string ;
+	rdfs:label "Protocol"^^xsd:string ;
+	rdfs:domain cst:RemoteService ;
+	rdfs:range xsd:string .	
+
+cst:cveIdentifier
+	rdf:type rdf:Property ;
+	rdfs:comment "Common Vulnerability and Exposure Identifier of a vulnerability in software"^^xsd:string ;
+	rdfs:label "CVE Identifier"^^xsd:string ;
+	rdfs:domain cst:SoftwareVulnerability ;
+	rdfs:range xsd:string .	
+
+cst:cvssScore
+	rdf:type rdf:Property ;
+	rdfs:comment "The Common Vulnerability Scoring System (CVSS) score associated with a given CVE identified vulnerability. Number between 1 and 10. Measures  "^^xsd:string ;
+	rdfs:label "CVSS Score"^^xsd:string ;
+	rdfs:domain cst:SoftwareVulnerability ;
+	rdfs:range xsd:int .	
+
+cst:cvssExploitabilityScore
+	rdf:type rdf:Property ;
+	rdfs:comment "CVSS from 1 to 10 regarding the skill level required to exploit the vulnerability. 10 is most exploitable, 1 is least."^^xsd:string ;
+	rdfs:label "CVSS Exploitability Score"^^xsd:string ;
+	rdfs:domain cst:SoftwareVulnerability ;
+	rdfs:range xsd:int ;
+	rdfs:subPropertyOf cst:cvssScore .
+
+cst:cweIdentifier
+	rdf:type rdf:Property ;
+	rdfs:comment "The Common Weakness Enumeration (CWE) score associated with a given CVE identified vulnerability. Categorises Vulnerabilities into logical Groupings."^^xsd:string ;
+	rdfs:label "CWE Score"^^xsd:string ;
+	rdfs:domain cst:SoftwareWeakness ;
+	rdfs:range xsd:int .	
+
+
+# The Following Properties relate to Domains and Users
+
+cst:domainName
+	rdf:type rdf:Property ;
+	rdfs:comment "Unique name of a domain"^^xsd:string ;
+	rdfs:label "Domain Name"^^xsd:string ;
+	rdfs:domain cst:Domain ;
+	rdfs:range xsd:string .
+
+cst:userID
+	rdf:type rdf:Property ;
+	rdfs:comment "Unique Identifier of a User"^^xsd:string ;
+	rdfs:label "User ID"^^xsd:string ;
+	rdfs:domain cst:User ;
+	rdfs:domain xsd:string .
+
+cst:username
+	rdf:type rdf:Property ;
+	rdfs:comment "Name of account"^^xsd:string ;
+	rdfs:label "Username"^^xsd:string ;
+	rdfs:domain cst:User ;
+	rdfs:range xsd:string .
+
+cst:password 
+	rdf:type rdf:Property ;
+	rdfs:comment "Password of user. Required for Authentication"^^xsd:string ;
+	rdfs:label "Password"^^xsd:string ;
+	rdfs:domain cst:User ;
+	rdfs:range xsd:string .
+
+cst:userPrivilegeLevel
+	rdf:type rdfs:Property ;
+	rdfs:comment "user's privilege level. Must be either USER or ADMINISTRATOR"^^xsd:string ;
+	rdfs:label "User Privilege Level"^^xsd:string ;
+	rdfs:domain cst:User ;
+	rdfs:range xsd:string .
+
+# The Following Properties relate to Disks Data and Encryption
+
+cst:diskSize
+	rdf:type rdf:Property ;
+	rdfs:comment "Size of Disk (I.e. Data Capacity)"^^xsd:string ;
+	rdfs:label "Disk Size"^^xsd:string ;
+	rdfs:domain cst:Disk ;
+	rdfs:range xsd:int .
+
+cst:volumeName 
+	rdf:type rdfs:Property ;
+	rdfs:comment "Name associated with a disk"^^xsd:string ;
+	rdfs:label "Volume Name"^^xsd:string ;
+	rdfs:domain cst:Disk ;
+	rdfs:range xsd:string .
+
+cst:enryptionAlgorithim
+	rdf:type rdf:Property ;
+	rdfs:comment "The Algorithim used to encrypt a disk"^^xsd:string ;
+	rdfs:label "Encryption Algorithim"^^xsd:string ;
+	rdfs:domain cst:Encryption ;
+	rdfs:range xsd:string .
+
+cst:encryptionKeyLength
+	rdf:type rdf:Property ;
+	rdfs:comment "The Keylength of the Encryption algorithim - relates to strength of encryption algorithim "^^xsd:string ;
+	rdfs:label "Encryption Key Length"^^xsd:string ;
+	rdfs:domain cst:Encryption ;
+	rdfs:range xsd:int .
+
+cst:dataSize 
+	rdf:type rdf:Property ;
+	rdfs:comment "Size of a given piece of data"^^xsd:string ;
+	rdfs:label "Size of Data Item"^^xsd:string ;
+	rdfs:domain cst:Data ;
+	rdfs:range xsd:int .
+
+cst:dataType 
+	rdf:type rdf:Property ;
+	rdfs:comment "the Type, or nature of the data"^^xsd:string ;
+	rdfs:label "Type of Data"^^xsd:string ;
+	rdfs:domain cst:Data ;
+	rdfs:range xsd:string .				
+
+
+# Properties Relating to IDS
+
+cst:ruleNumber 
+	rdf:type rdf:Property ;
+	rdfs:comment "The unique identifier of the IDS rule"^^xsd:string ;
+	rdfs:label "Intrusion Detection System Rule Number"^^xsd:string ;
+	rdfs:domain cst:IdsRule ;
+	rdfs:range xsd:string .
+
+cst:idsSignature
+	rdf:type rdf:Property ;
+	rdfs:comment "A Signature that will be used to trigger an IDS. Will be associated with the Exploit ID or CVE etc of a malicious activity. Allows the instantiator to define their 'database of known attacks' and simulate 0-days"^^xsd:string ;
+	rdfs:label "IDS Signature"^^xsd:string ;
+	rdfs:domain cst:IdsRule ;
+	rdfs:range xsd:string .
+	# Mapping of Vulns to Exploits https://cve.mitre.org/data/refs/refmap/source-EXPLOIT-DB.html
+
+cst:idsAction 
+	rdf:type rdf:Property ;
+	rdfs:comment "The Action to be taken by the IDS. Could be 'alert' 'ignore' 'activate MTNDM' etc. Enalbes the instantiator to replicate poorly designed or tuned IDS"^^xsd:string ;
+	rdfs:label "IDS Action"^^xsd:string ;
+	rdfs:domain cst:IdsRule ; 
+	rdfs:range xsd:string .		
+
+
+#    ____    _____   _          _      _____   ___    ___    _   _   ____    _   _   ___   ____    ____  
+#   |  _ \  | ____| | |        / \    |_   _| |_ _|  / _ \  | \ | | / ___|  | | | | |_ _| |  _ \  / ___| 
+#   | |_) | |  _|   | |       / _ \     | |    | |  | | | | |  \| | \___ \  | |_| |  | |  | |_) | \___ \ 
+#   |  _ <  | |___  | |___   / ___ \    | |    | |  | |_| | | |\  |  ___) | |  _  |  | |  |  __/   ___) |
+#   |_| \_\ |_____| |_____| /_/   \_\   |_|   |___|  \___/  |_| \_| |____/  |_| |_| |___| |_|     |____/ 
+#                                                                                                        
+
+# Regarding Core Computer and Network Functionality
+
+cst:hasNic
+	rdf:type rdf:Property ;
+	rdfs:comment "Link between computer and network card"^^xsd:string ;
+	rdfs:label "Has Network Card"^^xsd:string ;
+	rdfs:domain cst:Computer ;
+	rdfs:range cst:Nic .
+
+cst:isConnectedTo
+	rdf:type rdf:Property ;
+	rdf:type owl:TransitiveProperty ;
+	owl:disjointUnionOf (cst:Nic cst:WirelessAccessPoint) ;
+	rdfs:comment "Link between NIC and WAP and Network"^^xsd:string ;
+	rdfs:label "Is Connected To"^^xsd:string ;
+	rdfs:domain cst:Nic ;
+	rdfs:range cst:WirelessAccessPoint ;
+	rdfs:domain cst:WirelessAccessPoint ;
+	rdfs:range cst:Network .	
+
+cst:hasEdgeNic
+	rdf:type rdf:Property ;
+	rdfs:comment "Link to network interface on router"^^xsd:string ;
+	rdfs:label "Edge Network Interface"^^xsd:string ;
+	rdfs:domain cst:Network ;
+	rdfs:range cst:Nic .
+
+cst:hasRoute
+	rdf:type rdf:Property ;
+	rdfs:comment "A route between networks posessed by a router"^^xsd:string ;
+	rdfs:label "Has Route"^^xsd:string ;
+	rdfs:domain cst:Router ;
+	rdfs:range cst:Route .	
+
+cst:routeOrigin
+	rdf:type rdf:Property ;
+	rdfs:comment "Start point of a route"^^xsd:string ;
+	rdfs:label "Route Origin"^^xsd:string ;
+	rdfs:domain cst:Route ;
+	rdfs:range cst:Nic .
+
+cst:routeDestination
+	rdf:type rdf:Property ;
+	rdfs:comment "End point of a route"^^xsd:string ;
+	rdfs:label "Route Destination"^^xsd:string ;
+	rdfs:domain cst:Route ;
+	rdfs:range cst:Nic .
+
+
+# The Following Relationships regard Wireless
+
+cst:hasWirelessSecurityProtocol
+	rdf:type rdf:Property ;
+	rdfs:comment "Links to the wireless security protocol running on a given wireless access point"^^xsd:string ;
+	rdfs:label "Has Wireless Security Protocol"^^xsd:string ;
+	rdfs:domain cst:WirelessAccessPoint ;
+	rdfs:range cst:WirelessSecurityProtocol .
+
+
+# Regarding Virtualisation 
+
+cst:hasVirtualNIC
+	rdf:type rdf:Property ;
+	rdfs:comment "Denotes conenction to a VNIC. Facilitates the differentiation of physical and virtual machines when querying the network. "^^xsd:string ;
+	rdfs:label "Has Virtual NIC"^^xsd:string ;
+	rdfs:domain cst:VirtualMachine ;
+	rdfs:range cst:VirtualNic .		
+	#This propery exists in order to facilitate the differentiation of VM to VNIC and Physical computer to VNIC connections in querying. 
+
+cst:hasVirtualPrivateNetworkConnection
+	rdf:type rdf:Property ;
+	rdfs:comment "Denotes a VPN connection to a subnet"^^xsd:string ;
+	rdfs:label "Has Virtual Private Network Connection"^^xsd:string ;
+	rdfs:domain cst:VirtualNic ;
+	rdfs:range cst:SubNetwork .		
+
+cst:isVirtuallyConnectedTo
+	rdf:type rdf:Property ;
+	rdfs:comment "Link between NIC and Network"^^xsd:string ;
+	rdfs:label "Is Virtually Connected To"^^xsd:string ;
+	rdfs:domain cst:VirtualNic ;
+	rdfs:range cst:VirtualNetwork .	
+
+
+# Following relationships are to do with software, services and vulnerabilities. 
+
+cst:isSoftwareType 
+	rdf:type rdf:Property ;
+	rdfs:comment "A node can run zero to many pieces of software"^^xsd:string ;
+	rdfs:label "Has Software Type."^^xsd:string ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range cst:SoftwareType .
+
+cst:hasInstalledSoftwareVersion
+	rdf:type rdf:Property ;
+	rdfs:comment "A node can run zero to many of installed software versions"^^xsd:string ;
+	rdfs:label "Has Installed Software."^^xsd:string ;
+	rdfs:domain cst:Node ;
+	rdfs:range cst:InstalledSoftwareVersion .	
+
+cst:projectsService 
+	rdf:type rdf:Property ;
+	rdfs:comment "Software will project a service onto the computer either locally or remotely."^^xsd:string ;
+	rdfs:label "Projects Service "^^xsd:string ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range cst:Service .
+
+cst:hasVisibleService
+	rdf:type rdf:Property ;
+	rdfs:comment "A remote service is visible on a computers network card (IOT facilitate port scanning and attack vectors"^^xsd:string ;
+	rdfs:label "Is Visible On"^^xsd:string ;
+	rdfs:domain cst:Nic ;
+	rdfs:range cst:RemoteService .	
+
+cst:hasSoftwareVulnerability
+	rdf:type rdf:Property ;
+	rdfs:comment "A Software Version will be associated with between zero and many vulnerabilities"^^xsd:string ;
+	rdfs:label "Has Vulnerability"^^xsd:string ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range cst:SoftwareVulnerability .
+
+cst:includesVulnerability 
+	rdf:type rdf:Property ;
+	rdfs:comment "The Vulnerabilites included in a weakness"^^xsd:string ;
+	rdfs:label "Includes Vulnerability"^^xsd:string ;
+	rdfs:domain cst:SoftwareWeakness ;
+	rdfs:range cst:SoftwareVulnerability .
+
+cst:hasSoftwareConfiguration 
+	rdf:type rdf:Property ;
+	rdfs:comment "The Association between a software configuration and it's version"^^xsd:string ;
+	rdfs:label "Has Software Configuration"^^xsd:string ;
+	rdfs:domain cst:InstalledSoftwareVersion ;
+	rdfs:range cst:SoftwareConfiguration .	
+
+
+# The Following relationships are regarding Domains and Users
+
+cst:controlsDomain
+	rdf:type rdf:Property ;
+	rdfs:comment "Link between the domain controller and the domain "^^xsd:string ;
+	rdfs:label "Controls Domain "^^xsd:string ;
+	rdfs:domain cst:DomainController ;
+	rdfs:range cst:Domain .
+
+cst:hasAccessTo 
+	rdf:type rdf:property ;
+	rdf:type owl:TransitiveProperty ;
+	owl:disjointUnionOf (cst:LocalUser cst:DomainUser cst:Domain) ;
+	rdfs:comment "Transitive Property to determine the users assocaited with a computer"^^xsd:string ;
+	rdfs:label "Has Access To"^^xsd:string ;
+	rdfs:domain cst:LocalUser ;
+	rdfs:range cst:Computer ;
+	rdfs:domain cst:DomainUser ;
+	rdfs:range cst:Domain ;
+	rdfs:domain cst:Domain .
+	#Disjoint union adresses the multiple domains in this relationship
+
+
+# The following relationships are to do with Disks, Data and Encryption
+
+cst:hasDisk
+	rdf:type rdf:Property ;
+	rdfs:comment "Relationship between disk and a computer. A computer can have multiple disks "^^xsd:string ;
+	rdfs:label "Has Disk"^^xsd:string ;
+	rdfs:domain cst:Computer ;
+	rdfs:range cst:Disk .
+
+cst:isEncryptedWith
+	rdf:type rdf:Property ;
+	rdfs:comment "Link between a disk and its encryption. If no encryption the relationship won't be made"^^xsd:string ;
+	rdfs:label "Is Encrypted With"^^xsd:string ;
+	rdfs:domain cst:Disk ;
+	rdfs:range cst:Encryption .
+
+cst:containsData 
+	rdf:type rdf:Property ;
+	rdfs:comment "Relationship between disk and data. Can have multiple pieces of data on a disk. Data size should not exceed disk size"^^xsd:string ;
+	rdfs:label "Contains Data"^^xsd:string ;	
+	rdfs:domain cst:Disk ;
+	rdfs:range cst:Data .
+
+cst:hasOwner
+	rdf:type rdf:Property ;
+	rdfs:comment "Data is owned by someone. If the person trying to access the data is not the owner then they should be denied access alt: encryption should be activated "^^xsd:string ;
+	rdfs:label "Has Owner"^^xsd:string ;
+	rdfs:domain cst:Data ;
+	rdfs:range cst:User .
+
+
+#The Following Relationships are related to the implementation of IDS 
+
+cst:monitorsSubnet 
+	rdf:type rdf:Property ;
+	rdfs:comment "The NIDS will monitor a subnet."^^xsd:string ;
+	rdfs:label "monitors Subnet"^^xsd:string ;
+	rdfs:domain cst:NetworkIDS ;
+	rdfs:range cst:SubNetwork .
+
+	
+
+
+

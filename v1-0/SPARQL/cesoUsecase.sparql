@@ -1,0 +1,515 @@
+#####
+#Author: Kent O'Sullivan
+#Purpose: This file contains a Sample of the Competency Questions used to assess the functionality of the CESO. When it was able to answer the following questions with enough accuracy and expressiveness it was deemed competent. 
+#####
+
+#     _____                           _                           ____                  _   _                 
+#    / ____|                         | |                         / __ \                | | (_)                
+#   | |     ___  _ __ ___  _ __   ___| |_ ___ _ __   ___ _   _  | |  | |_   _  ___  ___| |_ _  ___  _ __  ___ 
+#   | |    / _ \| '_ ` _ \| '_ \ / _ \ __/ _ \ '_ \ / __| | | | | |  | | | | |/ _ \/ __| __| |/ _ \| '_ \/ __|
+#   | |___| (_) | | | | | | |_) |  __/ ||  __/ | | | (__| |_| | | |__| | |_| |  __/\__ \ |_| | (_) | | | \__ \
+#    \_____\___/|_| |_| |_| .__/ \___|\__\___|_| |_|\___|\__, |  \___\_\\__,_|\___||___/\__|_|\___/|_| |_|___/
+#                         | |                             __/ |                                               
+# 
+
+1.        Which Nodes are visible in the ontology?
+2.        Which Networks are visible?
+3.        Which Subnetwork does each node belong to?
+4.        What is the IP address of each node on the network?
+5.        What software is funning on which machine?
+6.        Which services are remote and what are they projecting?
+7.        Which nodes on the network are running vulnerable software?
+8.        What weakness encompasses this vulnerability?
+9.        How difficult is it for an attacker to exploit this vulnerability?
+10.       Which computers represented in the ontology are members of a domain?
+11.       Can a domain user access any node that is a member of the domain?
+12.       Who are all the users of a given domain?
+13.       Which users are administrators and which are normal users?
+14.       Which nodes are running HIDS?
+15.       Which subnetworks are running NIDS?
+16.       Can a HIDS detect a vulnerability or exploit present in the terrain?
+17.       Which computers have storage disks?
+18.       Which disks have Data?
+19.       Which disks are encrypted
+20.       Who owns piece of data X?
+21.       Which networks are wirelessly accessibele?
+22.       Does a portscan return both wired and wireless connections together?
+23.       What is the wireless security protocol that is being used to protect a given network?
+24.       Which nodes on the network are virtual machines?
+25.       What are all the active VPN Connections?
+26.       Can a virtual machine be seen as part of a physical network?
+27.       Which exploit maps to which vulnerability?
+28.       Who are the threat actors involved in an incident?
+29.       Which organisation do the threats belong to?
+30.       What course of action is available to address an exploit?
+31.       What effect will an exploit have on the system it is targeting?
+32.		  What effect has an attack had?
+ 
+#     ____                  _                             _   _____                 _ _       
+#    / __ \                (_)                           | | |  __ \               | | |      
+#   | |  | |_   _  ___ _ __ _  ___  ___    __ _ _ __   __| | | |__) |___  ___ _   _| | |_ ___ 
+#   | |  | | | | |/ _ \ '__| |/ _ \/ __|  / _` | '_ \ / _` | |  _  // _ \/ __| | | | | __/ __|
+#   | |__| | |_| |  __/ |  | |  __/\__ \ | (_| | | | | (_| | | | \ \  __/\__ \ |_| | | |_\__ \
+#    \___\_\\__,_|\___|_|  |_|\___||___/  \__,_|_| |_|\__,_| |_|  \_\___||___/\__,_|_|\__|___/
+#                                                                                             
+#       
+
+#Note - All queries below are formatted for use by the stardog query engine. They are still using SPARQL.  
+
+
+1.	Which Nodes are visible in the ontology?
+./stardog query -r Evalusecase_DB "SELECT ?Node WHERE {?Node rdf:type cst:Node}"
++------------------------------------+
+|                Node                |
++------------------------------------+
+| usecase:JointFiresRouter           |
+| usecase:JointFiresDomain           |
+| usecase:JointFiresDomainController |
+| usecase:JFT_Computer               |
+| usecase:JFCC_Computer              |
+| usecase:C_BTY_HQ_Computer          |
+| usecase:C_BTY_1TP_Computer         |
+| usecase:C_BTY_2TP_Computer         |
+| usecase:C_BTY_3TP_Computer         |
+| usecase:JFT_Laptop                 |
+| usecase:NIDS_JFCCNET               |
+| usecase:AttackerVirtualServer      |
+| usecase:Attacker1_VM               |
+| usecase:Attacker2_VM               |
++------------------------------------+
+#N.b. - inferrencing must be enabled for this query to work. Note how it shows all nodes inclusing VMs, the NIDS and the DC
+
+2.	Which Networks are visible?
+./stardog query -r Evalusecase_DB "SELECT ?Network WHERE {?Network rdf:type cst:Network}"
++--------------------------------+
+|            Network             |
++--------------------------------+
+| usecase:JFCCNET                |
+| usecase:JFTNET                 |
+| usecase:C_BTYNET               |
+| usecase:AttackerNet            |
+| usecase:JFTWAP                 |
+| usecase:AttackerNET            |
+| usecase:AttackerVirtualNetwork |
++--------------------------------+
+#Note: Shows virtualNet too - an refine by asking for just subnets
+
+3.	Which Subnetwork does each node belong to?
+./stardog query -r Evalusecase_DB "SELECT ?Network ?Node WHERE {?Network rdf:type cst:Network . ?Node cst:hasNic ?Nic . ?Nic cst:isConnectedTo ?Network}"
++---------------------+------------------------------------+
+|       Network       |                Node                |
++---------------------+------------------------------------+
+| usecase:JFTNET      | usecase:JointFiresRouter           |
+| usecase:JFCCNET     | usecase:JointFiresRouter           |
+| usecase:C_BTYNET    | usecase:JointFiresRouter           |
+| usecase:AttackerNet | usecase:JointFiresRouter           |
+| usecase:JFCCNET     | usecase:JointFiresDomainController |
+| usecase:JFTWAP      | usecase:JFT_Laptop                 |
+| usecase:JFCCNET     | usecase:JFCC_Computer              |
+| usecase:C_BTYNET    | usecase:C_BTY_HQ_Computer          |
+| usecase:C_BTYNET    | usecase:C_BTY_1TP_Computer         |
+| usecase:C_BTYNET    | usecase:C_BTY_2TP_Computer         |
+| usecase:C_BTYNET    | usecase:C_BTY_3TP_Computer         |
+| usecase:AttackerNET | usecase:AttackerVirtualServer      |
++---------------------+------------------------------------+
+
+
+
+4.	What is the IP address of each node on the network?
+./stardog query -r Evalusecase_DB "SELECT ?Network ?Node ?IPAddress WHERE {?Network rdf:type cst:Network . ?Node cst:hasNic ?Nic . ?Nic cst:isConnectedTo ?Network . ?Nic cst:ipAddress ?IPAddress} ORDER BY ASC(?IPAddress)"
++---------------------+------------------------------------+----------------+
+|       Network       |                Node                |   IPAddress    |
++---------------------+------------------------------------+----------------+
+| usecase:JFTWAP      | usecase:JFT_Laptop                 | "10.10.0.1"    |
+| usecase:JFTNET      | usecase:JointFiresRouter           | "10.10.0.200"  |
+| usecase:JFCCNET     | usecase:JFCC_Computer              | "10.10.1.1"    |
+| usecase:JFCCNET     | usecase:JointFiresDomainController | "10.10.1.100"  |
+| usecase:JFCCNET     | usecase:JointFiresRouter           | "10.10.1.200"  |
+| usecase:C_BTYNET    | usecase:C_BTY_1TP_Computer         | "10.10.3.1"    |
+| usecase:C_BTYNET    | usecase:C_BTY_2TP_Computer         | "10.10.3.2"    |
+| usecase:C_BTYNET    | usecase:JointFiresRouter           | "10.10.3.200"  |
+| usecase:C_BTYNET    | usecase:C_BTY_3TP_Computer         | "10.10.3.3"    |
+| usecase:C_BTYNET    | usecase:C_BTY_HQ_Computer          | "10.10.3.9"    |
+| usecase:AttackerNET | usecase:AttackerVirtualServer      | "10.10.66.10"  |
+| usecase:AttackerNet | usecase:JointFiresRouter           | "10.10.66.200" |
++---------------------+------------------------------------+----------------+
+#Note how we can see them ordered by subnet IAW the laptop. Also not how JFT laptop appears as part of the search for networks! and how it's not there twice becuase of disjoint.
+
+###
+
+5.	What software is running on which machine?
+./stardog query -r Evalusecase_DB "SELECT ?Software ?Computer WHERE {?Computer cst:hasInstalledSoftwareVersion ?Software }"
++------------------------------------------+----------------------------+
+|                 Software                 |          Computer          |
++------------------------------------------+----------------------------+
+| usecase:MissionControlSoftwareV3_0       | usecase:JFCC_Computer      |
+| usecase:OpenSSL1_0_1                     | usecase:JFCC_Computer      |
+| usecase:OpenSSL1_0_1                     | usecase:C_BTY_HQ_Computer  |
+| usecase:BatteryManagementSoftwareV16_8_8 | usecase:C_BTY_HQ_Computer  |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_1TP_Computer |
+| usecase:HIDS1_1_1                        | usecase:C_BTY_1TP_Computer |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_2TP_Computer |
+| usecase:HIDS1_1_1                        | usecase:C_BTY_2TP_Computer |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_3TP_Computer |
+| usecase:HIDS1_1_1                        | usecase:C_BTY_3TP_Computer |
+| usecase:CallForFireCommsSoftwareV5_7     | usecase:JFT_Laptop         |
+| usecase:TargetingSoftwareV1_5_5          | usecase:JFT_Laptop         |
+| usecase:NIDS1_1_1                        | usecase:NIDS_JFCCNET       |
++------------------------------------------+----------------------------+
+
+
+6.	Which services are remote and what are they projecting?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?RemoteService ?Port ?Protocol  WHERE {?Computer cst:hasInstalledSoftwareVersion ?Software . ?Software cst:projectsService ?RemoteService . ?RemoteService cst:port ?Port . ?RemoteService cst:protocol ?Protocol}"
++----------------------------+---------------------------+----------+-----------+
+|          Computer          |       RemoteService       |   Port   | Protocol  |
++----------------------------+---------------------------+----------+-----------+
+| usecase:JFT_Laptop         | usecase:CallForFireComms  | "8766"   | "CFFC"    |
+| usecase:JFCC_Computer      | usecase:MissionController | "7331"   | "MsnC"    |
+| usecase:JFCC_Computer      | usecase:SSL               | "443"    | "SSL"     |
+| usecase:C_BTY_HQ_Computer  | usecase:SSL               | "443"    | "SSL"     |
+| usecase:C_BTY_HQ_Computer  | usecase:BatteryManager    | "8765"   | "BTYMan"  |
+| usecase:C_BTY_1TP_Computer | usecase:FireController    | "161616" | "FireMan" |
+| usecase:C_BTY_2TP_Computer | usecase:FireController    | "161616" | "FireMan" |
+| usecase:C_BTY_3TP_Computer | usecase:FireController    | "161616" | "FireMan" |
++----------------------------+---------------------------+----------+-----------+
+
+###
+
+
+
+
+7.	Which nodes on the network are running vulnerable software?
+./stardog query Evalusecase_DB "SELECT ?Node ?VulnerableSoftware WHERE {?VulnerableSoftware cst:hasVulnerability ?Vulnerability . ?Node cst:hasInstalledSoftwareVersion ?VulnerableSoftware}"
++---------------------------+--------------------------+
+|           Node            |    VulnerableSoftware    |
++---------------------------+--------------------------+
+| usecase:JFCC_Computer     | usecase:OpenSSL1_0_1     |
+| usecase:C_BTY_HQ_Computer | usecase:OpenSSL1_0_1     |
+| usecase:C_BTY_HQ_Computer | usecase:AdobeReader8_1_3 |
++---------------------------+--------------------------+
+
+
+8.	What weakness encompasses this vulnerability?
+./stardog query Evalusecase_DB "SELECT ?VulnerableSoftware ?Vulnerability ?Weakness WHERE {?VulnerableSoftware cst:hasVulnerability ?Vulnerability . ?Weakness cst:includesVulnerability ?Vulnerability}"
++--------------------------+-----------------------------+---------------------------------------------------------------------+
+|    VulnerableSoftware    |        Vulnerability        |                              Weakness                               |
++--------------------------+-----------------------------+---------------------------------------------------------------------+
+| usecase:OpenSSL1_0_1     | usecase:Heartbleed          | usecase:FailureToConstrainOperationsWithinTheBoundsOfAMemeoryBuffer |
+| usecase:AdobeReader8_1_3 | usecase:AdobeBufferOverflow | usecase:InputValidation                                             |
++--------------------------+-----------------------------+---------------------------------------------------------------------+
+
+9.	How difficult is it for an attacker to exploit this vulnerability?
+./stardog query Evalusecase_DB "SELECT ?Node ?VulnerableSoftware ?Vulnerability ?ExploitabilityScore WHERE {?Node cst:hasInstalledSoftwareVersion ?VulnerableSoftware .?VulnerableSoftware cst:hasVulnerability ?Vulnerability . ?Vulnerability cst:cvssExploitabilityScore ?ExploitabilityScore}"
++---------------------------+----------------------+--------------------+---------------------+
+|           Node            |  VulnerableSoftware  |   Vulnerability    | ExploitabilityScore |
++---------------------------+----------------------+--------------------+---------------------+
+| usecase:JFCC_Computer     | usecase:OpenSSL1_0_1 | usecase:Heartbleed | "10"                |
+| usecase:C_BTY_HQ_Computer | usecase:OpenSSL1_0_1 | usecase:Heartbleed | "10"                |
++---------------------------+----------------------+--------------------+---------------------+
+
+
+###
+
+10.	Which computers represented in the ontology are members of a domain?
+./stardog query Evalusecase_DB "SELECT ?Domain ?Computer WHERE {?Domain rdf:type cst:Domain . ?Domain cst:hasAccessTo ?Computer}"
++--------------------------+------------------------------------+
+|          Domain          |              Computer              |
++--------------------------+------------------------------------+
+| usecase:JointFiresDomain | usecase:JointFiresDomainController |
+| usecase:JointFiresDomain | usecase:JFT_Computer               |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         |
++--------------------------+------------------------------------+
+11.	Can a domain user access any node that is a member of the domain?
+./stardog query Evalusecase_DB "SELECT ?Domain ?Computer ?User WHERE {?Domain rdf:type cst:Domain . ?Domain cst:hasAccessTo ?Computer . ?User cst:hasAccessTo ?Domain}"
++--------------------------+------------------------------------+-----------------------------+
+|          Domain          |              Computer              |            User             |
++--------------------------+------------------------------------+-----------------------------+
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:JointFiresDomainController | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFT_Computer               | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         | usecase:S6Admin             |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         | usecase:S6Admin             |
++--------------------------+------------------------------------+-----------------------------+
+
+
+
+12.	Who are all the users of a given domain?
+./stardog query Evalusecase_DB "SELECT ?Domain ?User WHERE {?Domain rdf:type cst:Domain .?User cst:hasAccessTo ?Domain}"
++--------------------------+-----------------------------+
+|          Domain          |            User             |
++--------------------------+-----------------------------+
+| usecase:JointFiresDomain | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:BCChraliebattery    |
+| usecase:JointFiresDomain | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:S6Admin             |
++--------------------------+-----------------------------+
+
+
+13.	Which users are administrators and which are normal users? 
+./stardog query Evalusecase_DB "SELECT ?Domain ?User ?PrivilegeLevel WHERE {?Domain rdf:type cst:Domain .?User cst:hasAccessTo ?Domain . ?User cst:userPrivilegeLevel ?PrivilegeLevel}"
++--------------------------+-----------------------------+-----------------+
+|          Domain          |            User             | PrivilegeLevel  |
++--------------------------+-----------------------------+-----------------+
+| usecase:JointFiresDomain | usecase:ForwardObserver     | "USER"          |
+| usecase:JointFiresDomain | usecase:JointFirecontroller | "USER"          |
+| usecase:JointFiresDomain | usecase:BCChraliebattery    | "USER"          |
+| usecase:JointFiresDomain | usecase:1Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:2Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:3Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:S6Admin             | "ADMINISTRATOR" |
++--------------------------+-----------------------------+-----------------+
+
+###
+
+14.	Which nodes are running HIDS?
+./stardog query -r Evalusecase_DB "SELECT ?Node ?Software WHERE {?Node cst:hasInstalledSoftwareVersion ?Software . ?Software cst:isSoftwareType usecase:HIDS}"
++----------------------------+-------------------+
+|            Node            |     Software      |
++----------------------------+-------------------+
+| usecase:C_BTY_HQ_Computer  | usecase:HIDS1_1_1 |
+| usecase:C_BTY_1TP_Computer | usecase:HIDS1_1_1 |
+| usecase:C_BTY_2TP_Computer | usecase:HIDS1_1_1 |
+| usecase:C_BTY_3TP_Computer | usecase:HIDS1_1_1 |
++----------------------------+-------------------+
+
+15.	Which subnetworks are running NIDS?
+./stardog query -r Evalusecase_DB "SELECT ?Subnetwork ?NIDS WHERE {?NIDS cst:monitorsSubnet ?Subnetwork}"
++-----------------+----------------------+
+|   Subnetwork    |         NIDS         |
++-----------------+----------------------+
+| usecase:JFCCNET | usecase:NIDS_JFCCNET |
++-----------------+----------------------+
+
+
+16.	Can a HIDS detect a vulnerability or exploit present in the terrain?
+./stardog query -r Evalusecase_DB "SELECT ?SoftwareCompromised ?Vulnerability ?Rule ?Signature ?Action  WHERE {usecase:C_BTY_HQ_Computer cst:hasInstalledSoftwareVersion ?IDS . ?IDS cst:hasSoftwareConfiguration ?Rule . usecase:C_BTY_HQ_Computer cst:hasInstalledSoftwareVersion ?SoftwareCompromised . ?SoftwareCompromised cst:hasVulnerability ?Vulnerability . ?Vulnerability cst:cveIdentifier ?Signature . ?Rule cst:idsSignature ?Signature . ?Rule cst:idsAction ?Action}"
+
++--------------------------+-----------------------------+------------------------------------+-----------------+---------+
+|   SoftwareCompromised    |        Vulnerability        |                Rule                |    Signature    | Action  |
++--------------------------+-----------------------------+------------------------------------+-----------------+---------+
+| usecase:AdobeReader8_1_3 | usecase:AdobeBufferOverflow | usecase:AdobeBufferOverflowWarning | "CVE-2009-0927" | "ALERT" |
++--------------------------+-----------------------------+------------------------------------+-----------------+---------+
+
+###
+
+17.	Which computers have storage disks?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Disk WHERE {?Computer cst:hasDisk ?Disk}"
++--------------------------------+------------------+
+|            Computer            |       Disk       |
++--------------------------------+------------------+
+| usecase:C_BTY_HQ_Computer      | usecase:HQ_Disk  |
+| usecase:C_BTY_2TP_Computer     | usecase:2TP_Disk |
+| usecase:C_BTY_3TP_Computer     | usecase:3TP_Disk |
+| usecase:C_BTY_1TP_Computer_Nic | usecase:1TP_Disk |
++--------------------------------+------------------+
+
+18.	Which disks have Data?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Disk ?DataInfo ?Data WHERE {?Computer cst:hasDisk ?Disk . ?Disk cst:hasData ?Data . ?Data cst:dataType ?DataInfo}"
++--------------------------------+------------------+--------------------------------------------------------+------------------+
+|            Computer            |       Disk       |                        DataInfo                        |       Data       |
++--------------------------------+------------------+--------------------------------------------------------+------------------+
+| usecase:C_BTY_HQ_Computer      | usecase:HQ_Disk  | "Battle Plans"                                         | usecase:HQ_Data  |
+| usecase:C_BTY_1TP_Computer_Nic | usecase:1TP_Disk | "Ammunition State"                                     | usecase:1TP_Data |
+| usecase:C_BTY_2TP_Computer     | usecase:2TP_Disk | "Music: Fortunate Son - Creedence Clearwater Revivial" | usecase:3TP_Data |
+| usecase:C_BTY_3TP_Computer     | usecase:3TP_Disk | "Music: Fortunate Son - Creedence Clearwater Revivial" | usecase:3TP_Data |
++--------------------------------+------------------+--------------------------------------------------------+------------------+
+
+19.	Which disks are encrypted
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Disk ?Encryption WHERE {?Computer cst:hasDisk ?Disk . ?Disk cst:isEncryptedWith ?Encryption}"
++---------------------------+-----------------+-------------+
+|         Computer          |      Disk       | Encryption  |
++---------------------------+-----------------+-------------+
+| usecase:C_BTY_HQ_Computer | usecase:HQ_Disk | usecase:AES |
++---------------------------+-----------------+-------------+
+
+20.	Who owns piece of data X?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Disk ?Owner WHERE {?Computer cst:hasDisk ?Disk . ?Disk cst:hasData ?Data . ?Data cst:hasOwner ?Owner}"
++--------------------------------+------------------+--------------------------+
+|            Computer            |       Disk       |          Owner           |
++--------------------------------+------------------+--------------------------+
+| usecase:C_BTY_HQ_Computer      | usecase:HQ_Disk  | usecase:BCChraliebattery |
+| usecase:C_BTY_1TP_Computer_Nic | usecase:1TP_Disk | usecase:1Troopcommander  |
+| usecase:C_BTY_2TP_Computer     | usecase:2TP_Disk | usecase:3Troopcommander  |
+| usecase:C_BTY_3TP_Computer     | usecase:3TP_Disk | usecase:3Troopcommander  |
++--------------------------------+------------------+--------------------------+
+
+
+###
+
+21.	Which networks are wirelessly accessibele?
+./stardog query -r Evalusecase_DB "SELECT ?WAP ?SSID {?WAP rdf:type cst:WirelessAccessPoint . ?WAP cst:ssid ?SSID}"
++----------------+------------+
+|      WAP       |    SSID    |
++----------------+------------+
+| usecase:JFTWAP | "JFT_WIFI" |
++----------------+------------+
+
+22.	Does a portscan return both wired and wireless connections together?
+./stardog query -r Evalusecase_DB "SELECT ?Computer WHERE {?Computer rdf:type cst:Computer}"
++------------------------------------+
+|              Computer              |
++------------------------------------+
+| usecase:JointFiresRouter           |
+| usecase:JointFiresDomain           |
+| usecase:JointFiresDomainController |
+| usecase:JFT_Computer               |
+| usecase:JFCC_Computer              |
+| usecase:C_BTY_HQ_Computer          |
+| usecase:C_BTY_1TP_Computer         |
+| usecase:C_BTY_2TP_Computer         |
+| usecase:C_BTY_3TP_Computer         |
+| usecase:JFT_Laptop                 |
+| usecase:C_BTY_1TP_Computer_Nic     |
+| usecase:AttackerVirtualServer      |
++------------------------------------+
+
+
+23.	What is the wireless security protocol that is being used to protect a given network?
+./stardog query -r Evalusecase_DB "SELECT ?WAP ?SSID ?SecurityProtocol {?WAP rdf:type cst:WirelessAccessPoint . ?WAP cst:ssid ?SSID . ?WAP cst:hasWirelessSecurityProtocol ?SecurityProtocol}"
++----------------+------------+------------------+
+|      WAP       |    SSID    | SecurityProtocol |
++----------------+------------+------------------+
+| usecase:JFTWAP | "JFT_WIFI" | usecase:WEP      |
++----------------+------------+------------------+
+
+###
+
+24.	Which nodes on the network are virtual machines?
+./stardog query -r Evalusecase_DB "SELECT ?VM WHERE {?VM rdf:type cst:VirtualMachine}"
++----------------------+
+|          VM          |
++----------------------+
+| usecase:Attacker1_VM |
+| usecase:Attacker2_VM |
++----------------------+
+
+
+25.	What are all the active VPN Connections? 
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Network WHERE {?Computer cst:hasNic ?VirtualNic . ?VirtualNic cst:hasVirtualPrivateNetworkConnection ?Network}"
++---------------------------+-----------------+
+|         Computer          |     Network     |
++---------------------------+-----------------+
+| usecase:C_BTY_HQ_Computer | usecase:JFCCNET |
++---------------------------+-----------------+
+
+26.	Can a virtual machine be seen as part of a physical network?
+./stardog query -r Evalusecase_DB "SELECT ?VM ?VMNET ?Computer ?Network WHERE {?VM cst:hasVirtualNic ?VNIC . ?VNIC cst:isVirtuallyConnectedTo ?VMNET . ?Computer cst:hasNic ?VNIC2 . ?VNIC2 cst:isVirtuallyConnectedTo ?VMNET . ?Computer cst:hasNic ?NIC . ?NIC cst:isConnectedTo ?Network}"
++----------------------+--------------------------------+-------------------------------+---------------------+
+|          VM          |             VMNET              |           Computer            |       Network       |
++----------------------+--------------------------------+-------------------------------+---------------------+
+| usecase:Attacker2_VM | usecase:AttackerVirtualNetwork | usecase:AttackerVirtualServer | usecase:AttackerNET |
+| usecase:Attacker1_VM | usecase:AttackerVirtualNetwork | usecase:AttackerVirtualServer | usecase:AttackerNET |
++----------------------+--------------------------------+-------------------------------+---------------------+
+
+
+###
+
+27.	Which exploit maps to which vulnerability?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Vulnerability ?Exploit WHERE {?Computer cst:hasInstalledSoftwareVersion ?Software . ?Software cst:hasVulnerability ?Vulnerability . ?Vulnerability rdf:type ?SoftwareVulnerability . ?ExploitTarget ceso:portkey_tso-cst_ExploitTarget-SoftwareVulnerability ?Vulnerability . ?Exploit tso:targets ?ExploitTarget}"
++---------------------------+--------------------+---------------------------+
+|         Computer          |   Vulnerability    |          Exploit          |
++---------------------------+--------------------+---------------------------+
+| usecase:JFCC_Computer     | usecase:Heartbleed | usecase:HeartbleedExploit |
+| usecase:C_BTY_HQ_Computer | usecase:Heartbleed | usecase:HeartbleedExploit |
++---------------------------+--------------------+---------------------------+
+
+
+28.	Who are the threat actors involved in an incident?
+./stardog query -r Evalusecase_DB "SELECT ?Incident ?ThreatActor WHERE {?Incident rdf:type event:Incident . ?Incident ceso:portkey_event-tso_Incident-Exploit ?Exploit . ?ThreatActor tso:usesExploit ?Exploit}"
++-------------------------------------+-------------------+
+|              Incident               |    ThreatActor    |
++-------------------------------------+-------------------+
+| usecase:HeartbleedExploitedIncident | usecase:Attacker1 |
+| usecase:HeartbleedExploitedIncident | usecase:Attacker2 |
++-------------------------------------+-------------------+
+
+
+29.	Which organisation do the threats belong to?
+./stardog query -r Evalusecase_DB "SELECT ?ThreatActor ?ThreatOrganisation WHERE {?ThreatActor ceso:portkey_tso-org_ThreatActor-ThreatOrganisation ?ThreatOrganisation}"
++-------------------+--------------------------------+
+|    ThreatActor    |       ThreatOrganisation       |
++-------------------+--------------------------------+
+| usecase:Attacker1 | usecase:3rdCyberWarfareSection |
+| usecase:Attacker2 | usecase:3rdCyberWarfareSection |
++-------------------+--------------------------------+
+
+
+30.	What course of action is available to address an exploit?
+./stardog query -r Evalusecase_DB "SELECT ?Exploit ?CourseOfAction WHERE {?Exploit tso:preventativeCourseOfAction ?CourseOfAction}"
++---------------------------+-----------------------+
+|          Exploit          |    CourseOfAction     |
++---------------------------+-----------------------+
+| usecase:HeartbleedExploit | usecase:UpdateOpenSSL |
++---------------------------+-----------------------+
+
+
+31. What Effect Could an exploit Have??
+./stardog query -r Evalusecase_DB "SELECT ?Exploit ?CyberEffect WHERE {?Exploit ceso:portkey_tso-ceso_Exploit-CyberEffect ?CyberEffect}"
++---------------------------+----------------------+
+|          Exploit          |     CyberEffect      |
++---------------------------+----------------------+
+| usecase:HeartbleedExploit | ceso:InterceptEffect |
++---------------------------+----------------------+
+
+
+=======
+32. What Effect has an Attack had?
+./stardog query -r Evalusecase_DB "SELECT ?Computer ?Vulnerability ?Exploit ?CyberEffect WHERE {?Computer cst:hasInstalledSoftwareVersion ?Software . ?Software cst:hasVulnerability ?Vulnerability . ?Vulnerability rdf:type ?SoftwareVulnerability . ?ExploitTarget ceso:portkey_tso-cst_ExploitTarget-SoftwareVulnerability ?Vulnerability . ?Exploit tso:targets ?ExploitTarget . ?Exploit ceso:portkey_tso-ceso_Exploit-CyberEffect ?CyberEffect}"
++---------------------------+--------------------+---------------------------+----------------------+
+|         Computer          |   Vulnerability    |          Exploit          |     CyberEffect      |
++---------------------------+--------------------+---------------------------+----------------------+
+| usecase:JFCC_Computer     | usecase:Heartbleed | usecase:HeartbleedExploit | ceso:InterceptEffect |
+| usecase:C_BTY_HQ_Computer | usecase:Heartbleed | usecase:HeartbleedExploit | ceso:InterceptEffect |
++---------------------------+--------------------+---------------------------+----------------------+
+

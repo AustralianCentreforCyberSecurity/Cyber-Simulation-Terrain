@@ -1,0 +1,187 @@
+Use Cases:
+
+1) What are the computers represented?
+2) What are the networks? 
+3) Which computers are on which network?
+4) What are the Domains?
+5) Who are the users?
+6) What level of access does each user have?
+7) Which computers are on the domain?
+8) What Software is running on each computer?
+9) What are the IP Addresses of the computers in the network?
+10) Are there any known vulnerabilities in the network?
+11) Who is vulnerable?
+12) What information could a portscanning attacker get that would lead them to this vulnerability?
+13) What vulnerabilities could an attacker exploit?
+
+#1)
+./stardog query usecase_DB "SELECT ?Computer WHERE {?Computer rdf:type cst:Computer}"
++----------------------------+
+|          Computer          |
++----------------------------+
+| usecase:JFT_Computer       |
+| usecase:JFCC_Computer      |
+| usecase:C_BTY_HQ_Computer  |
+| usecase:C_BTY_1TP_Computer |
+| usecase:C_BTY_2TP_Computer |
+| usecase:C_BTY_3TP_Computer |
++----------------------------+
+
+#2)
+./stardog query usecase_DB "SELECT ?Network WHERE {?Network rdf:type cst:SubNetwork}"
++------------------+
+|     Network      |
++------------------+
+| usecase:JFCCNET  |
+| usecase:JFTNET   |
+| usecase:C_BTYNET |
++------------------+
+
+#3) the seemingly redundant element of this query is used as a filter of sorts to address the transitivity of the hasAccessTo property
+./stardog query usecase_DB "SELECT ?Computer ?Subnet WHERE {?Computer cst:hasNic ?Nic . ?Nic cst:isConnectedTo ? ?Subnet . ?Nic cst:ipAddress ?ipAddress . ?Subnet cst:netName ?netName}"
++----------------------------+------------------+
+|          Computer          |      Subnet      |
++----------------------------+------------------+
+| usecase:JFCC_Computer      | usecase:JFCCNET  |
+| usecase:JointFiresRouter   | usecase:JFCCNET  |
+| usecase:JointFiresRouter   | usecase:JFTNET   |
+| usecase:JFT_Computer       | usecase:JFTNET   |
+| usecase:C_BTY_2TP_Computer | usecase:C_BTYNET |
+| usecase:C_BTY_3TP_Computer | usecase:C_BTYNET |
+| usecase:JointFiresRouter   | usecase:C_BTYNET |
+| usecase:C_BTY_HQ_Computer  | usecase:C_BTYNET |
+| usecase:C_BTY_1TP_Computer | usecase:C_BTYNET |
++----------------------------+------------------+
+
+#4)
+./stardog query usecase_DB "SELECT ?Domain WHERE {?Domain rdf:type cst:Domain}"
++--------------------------+
+|          Domain          |
++--------------------------+
+| usecase:JointFiresDomain |
++--------------------------+
+
+#5) # the seemingly redundant element of this query is used as a filter of sorts to address the transitivity of the hasAccessTo property
+./stardog query usecase_DB "SELECT ?Domain ?DomainUser WHERE {?DomainUser cst:hasAccessTo ?Domain . ?DC cst:controlsDomain ?Domain}"
++--------------------------+-----------------------------+
+|          Domain          |         DomainUser          |
++--------------------------+-----------------------------+
+| usecase:JointFiresDomain | usecase:ForwardObserver     |
+| usecase:JointFiresDomain | usecase:JointFirecontroller |
+| usecase:JointFiresDomain | usecase:OCChraliebatteru    |
+| usecase:JointFiresDomain | usecase:1Troopcommander     |
+| usecase:JointFiresDomain | usecase:2Troopcommander     |
+| usecase:JointFiresDomain | usecase:3Troopcommander     |
+| usecase:JointFiresDomain | usecase:S6Admin             |
++--------------------------+-----------------------------+
+
+#6) # the seemingly redundant element of this query is used as a filter of sorts to address the transitivity of the hasAccessTo property
+./stardog query usecase_DB "SELECT ?Domain ?DomainUser ?PrivilegeLevel WHERE {?DomainUser cst:hasAccessTo ?Domain . ?DC cst:controlsDomain ?Domain . ?DomainUser cst:userPrivilegeLevel ?PrivilegeLevel}"
++--------------------------+-----------------------------+-----------------+
+|          Domain          |         DomainUser          | PrivilegeLevel  |
++--------------------------+-----------------------------+-----------------+
+| usecase:JointFiresDomain | usecase:ForwardObserver     | "USER"          |
+| usecase:JointFiresDomain | usecase:JointFirecontroller | "USER"          |
+| usecase:JointFiresDomain | usecase:OCChraliebatteru    | "USER"          |
+| usecase:JointFiresDomain | usecase:1Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:2Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:3Troopcommander     | "USER"          |
+| usecase:JointFiresDomain | usecase:S6Admin             | "ADMINISTRATOR" |
++--------------------------+-----------------------------+-----------------+
+
+#7) # the seemingly redundant element of this query is used as a filter of sorts to address the transitivity of the hasAccessTo property
+./stardog query usecase_DB "SELECT ?Domain ?AvailableComputer WHERE {?Domain cst:hasAccessTo ?AvailableComputer . ?AvailableComputer cst:hasNic ?Nic }"
++--------------------------+------------------------------------+
+|          Domain          |         AvailableComputer          |
++--------------------------+------------------------------------+
+| usecase:JointFiresDomain | usecase:JointFiresDomainController |
+| usecase:JointFiresDomain | usecase:JFT_Computer               |
+| usecase:JointFiresDomain | usecase:JFCC_Computer              |
+| usecase:JointFiresDomain | usecase:C_BTY_HQ_Computer          |
+| usecase:JointFiresDomain | usecase:C_BTY_1TP_Computer         |
+| usecase:JointFiresDomain | usecase:C_BTY_2TP_Computer         |
+| usecase:JointFiresDomain | usecase:C_BTY_3TP_Computer         |
++--------------------------+------------------------------------+
+
+#8) 
+./stardog query usecase_DB "SELECT ?Software ?Computer WHERE {?Computer cst:hasInstalledSoftwareVersion ?Software }"
++------------------------------------------+----------------------------+
+|                 Software                 |          Computer          |
++------------------------------------------+----------------------------+
+| usecase:CallForFireCommsSoftwareV5_7     | usecase:JFT_Computer       |
+| usecase:TargetingSoftwareV1_5_5          | usecase:JFT_Computer       |
+| usecase:MissionControlSoftwareV3_0       | usecase:JFCC_Computer      |
+| usecase:OpenSSL1_0_1                     | usecase:JFCC_Computer      |
+| usecase:OpenSSL1_0_1                     | usecase:C_BTY_HQ_Computer  |
+| usecase:BatteryManagementSoftwareV16_8_8 | usecase:C_BTY_HQ_Computer  |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_1TP_Computer |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_2TP_Computer |
+| usecase:FireControlSoftwareV2_1          | usecase:C_BTY_3TP_Computer |
++------------------------------------------+----------------------------+
+
+#9)
+./stardog query usecase_DB "SELECT ?Subnet ?Computer ?IPaddress WHERE {?Computer cst:hasNic ?Nic . ?Nic cst:isConnectedTo ?Subnet . ?Nic cst:ipAddress ?IPaddress} ORDER BY ASC(?IPaddress)"
++------------------+----------------------------+---------------+
+|      Subnet      |          Computer          |   IPaddress   |
++------------------+----------------------------+---------------+
+| usecase:JFTNET   | usecase:JFT_Computer       | "10.10.0.1"   |
+| usecase:JFTNET   | usecase:JointFiresRouter   | "10.10.0.200" |
+| usecase:JFCCNET  | usecase:JFCC_Computer      | "10.10.1.1"   |
+| usecase:JFCCNET  | usecase:JointFiresRouter   | "10.10.1.200" |
+| usecase:C_BTYNET | usecase:C_BTY_1TP_Computer | "10.10.3.1"   |
+| usecase:C_BTYNET | usecase:C_BTY_2TP_Computer | "10.10.3.2"   |
+| usecase:C_BTYNET | usecase:JointFiresRouter   | "10.10.3.200" |
+| usecase:C_BTYNET | usecase:C_BTY_3TP_Computer | "10.10.3.3"   |
+| usecase:C_BTYNET | usecase:C_BTY_HQ_Computer  | "10.10.3.9"   |
++------------------+----------------------------+---------------+
+
+#10) 
+./stardog query usecase_DB "SELECT ?VulnerableSoftware WHERE {?VulnerableSoftware cst:hasVulnerability ?Vulnerability }"
++----------------------+
+|  VulnerableSoftware  |
++----------------------+
+| usecase:OpenSSL1_0_1 |
++----------------------+
+
+#11)
+./stardog query usecase_DB "SELECT ?Computer ?VulnerableSoftware WHERE {?VulnerableSoftware cst:hasVulnerability ?Vulnerability . ?Computer cst:hasInstalledSoftwareVersion ?VulnerableSoftware }"
++---------------------------+----------------------+
+|         Computer          |  VulnerableSoftware  |
++---------------------------+----------------------+
+| usecase:JFCC_Computer     | usecase:OpenSSL1_0_1 |
+| usecase:C_BTY_HQ_Computer | usecase:OpenSSL1_0_1 |
++---------------------------+----------------------+
+
+ 
+#12) 
+./stardog query usecase_DB "SELECT ?Computer ?IPaddress ?Service ?Port ?Protocol WHERE {?VictimNic cst:hasVisibleService ?Service . ?Service cst:port ?Port . ?Service cst:protocol ?Protocol . ?Computer cst:hasNic ?VictimNic . ?VictimNic cst:ipAddress ?IPaddress}"
++----------------------------+-------------+---------------------------+----------+-----------+
+|          Computer          |  IPaddress  |          Service          |   Port   | Protocol  |
++----------------------------+-------------+---------------------------+----------+-----------+
+| usecase:JFT_Computer       | "10.10.0.1" | usecase:CallForFireComms  | "8766"   | "CFFC"    |
+| usecase:JFCC_Computer      | "10.10.1.1" | usecase:MissionController | "7331"   | "MsnC"    |
+| usecase:JFCC_Computer      | "10.10.1.1" | usecase:SSL               | "443"    | "SSL"     |
+| usecase:C_BTY_HQ_Computer  | "10.10.3.9" | usecase:SSL               | "443"    | "SSL"     |
+| usecase:C_BTY_HQ_Computer  | "10.10.3.9" | usecase:BatteryManager    | "8765"   | "BTYMan"  |
+| usecase:C_BTY_1TP_Computer | "10.10.3.1" | usecase:FireController    | "161616" | "FireMan" |
+| usecase:C_BTY_2TP_Computer | "10.10.3.2" | usecase:FireController    | "161616" | "FireMan" |
+| usecase:C_BTY_3TP_Computer | "10.10.3.3" | usecase:FireController    | "161616" | "FireMan" |
++----------------------------+-------------+---------------------------+----------+-----------+
+
+#13)
+./stardog query usecase_DB "SELECT ?Service ?VulnerableSoftware ?Vulnerability WHERE {?VulnerableSoftware cst:projectsService ?Service . ?VulnerableSoftware cst:hasVulnerability ?Vulnerability }"
++-------------+----------------------+--------------------+
+|   Service   |  VulnerableSoftware  |   Vulnerability    |
++-------------+----------------------+--------------------+
+| usecase:SSL | usecase:OpenSSL1_0_1 | usecase:Heartbleed |
++-------------+----------------------+--------------------+
+
+#14)
+./stardog query usecase_DB "SELECT ?CVE ?cvssScore ?cvssExploitabilityScore ?WeaknessType ?CWEid WHERE {usecase:Heartbleed cst:cveIdentifier ?CVE . usecase:Heartbleed cst:cvssScore ?cvssScore . usecase:Heartbleed cst:cvssExploitabilityScore ?cvssExploitabilityScore . ?WeaknessType cst:includesVulnerability usecase:Heartbleed . ?WeaknessType cst:cweIdentifier ?CWEid }"
++-----------------+-----------+-------------------------+---------------------------------------------------------------------+-------+
+|       CVE       | cvssScore | cvssExploitabilityScore |                            WeaknessType                             | CWEid |
++-----------------+-----------+-------------------------+---------------------------------------------------------------------+-------+
+| "CVE-2014-0160" | "5"       | "10"                    | usecase:FailureToConstrainOperationsWithinTheBoundsOfAMemeoryBuffer | "119" |
++-----------------+-----------+-------------------------+---------------------------------------------------------------------+-------+
+
+

@@ -1,0 +1,650 @@
+############
+# Author: Kent O'Sullivan
+# purpose: Instantiation of the Cyber Ontology IOT demonstrate as a use case to represent the actions of a JFCC. Queries are run on this Instantiation to test that the ontology works as intended. 
+#
+# Commands to create in Stardog:
+# ./stardog-admin db drop Evalusecase_DB 
+# ./stardog-admin db create -n Evalusecase_DB /Users/kentosullivan/cyber-ontology/Ontology/usecase/thesisEvaluationUsecase.ttl /Users/kentosullivan/cyber-ontology/Ontology/domain/cyber/ceso.ttl  /Users/kentosullivan/cyber-ontology/Ontology/cyber/CyberSimulationTerrain/cst.ttl /Users/kentosullivan/cyber-ontology/Ontology/domain/cyber/ThreatSimulationOntology/tso.ttl /Users/kentosullivan/cyber-ontology/Ontology/domain/organisation/organisation.ttl /Users/kentosullivan/cyber-ontology/Ontology/core/event.ttl
+############
+
+@prefix core:    	<http://www.accs.unsw.adfa.edu.au/2015/09/05/core/core#> .
+@prefix ceso:   	<http://www.accs.unsw.adfa.edu.au/2015/09/05/domain/cyber/ceso#> .
+@prefix cst:   		<http://www.accs.unsw.adfa.edu.au/2015/09/05/domain/cyber/CyberSimulationTerrain/cst#> .
+@prefix tso:		<http://www.accs.unsw.adfa.edu.au/2015/09/05/domain/cyber/ThreatSimulationOntology/tso#> .
+@prefix org:    	<http://www.accs.unsw.adfa.edu.au/2015/09/05/domain/organisational/organisational#> .
+@prefix event:    	<http://www.accs.unsw.adfa.edu.au/2015/09/05/core/event#> .
+@prefix usecase:	<http://www.accs.unsw.adfa.edu.au/2015/10/16/usecase/thesisEvaluationUsecase#> .
+
+@prefix rdf:     	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:     	<http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:    	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:		<http://www.w3.org/2002/07/owl#> .
+
+usecase:JointFiresRouter
+	rdf:type cst:Router ;
+	cst:hostName "JointFiresRouter" ;
+	cst:hasNic usecase:JFTNET_Nic ;
+	cst:hasNic usecase:JFCCNET_Nic ;
+	cst:hasNic usecase:C_BTYNET_Nic ;
+	cst:hasNic usecase:AttackerNET_Nic ;
+	cst:hasRoute usecase:JFT-JFCC ;
+	cst:hasRoute usecase:JFCC-C_BTY ;
+	cst:hasRoute usecase:Attacker-JFCC ;
+	cst:hasRoute usecase:Attacker-C_BTY .
+	
+usecase:JFT-JFCC
+	rdf:type cst:Route ;
+	rdfs:label "Route: JFT Net to JFCC Net"^^xsd:string ;
+	cst:routeOrigin usecase:JFTNET_Nic ;
+	cst:routeDestination usecase:JFCCNET_Nic ;
+	cst:routeNumber "001" .		
+
+usecase:JFCC-C_BTY
+	rdf:type cst:Route ;
+	rdfs:label "Route: JFCC Net to C_BTY Net"^^xsd:string ;
+	cst:routeOrigin usecase:JFCCNET_Nic ;
+	cst:routeDestination usecase:C_BTYNET_Nic ;
+	cst:routeNumber "002" .
+
+usecase:Attacker-JFCC
+	rdf:type cst:Route ;
+	rdfs:label "Route: Attacker net to JFCC Net"^^xsd:string ;
+	cst:routeOrigin usecase:AttackerNET_Nic ;
+	cst:routeDestination usecase:JFCCNET_Nic ;
+	cst:routeNumber "003" .
+
+usecase:Attacker-C_BTY
+	rdf:type cst:Route ;
+	rdfs:label "Route: Attacker Net to C_BTY Net"^^xsd:string ;
+	cst:routeOrigin usecase:AttackerNET_Nic ;
+	cst:routeDestination usecase:C_BTYNET_Nic ;
+	cst:routeNumber "004" .	
+
+usecase:JointFiresDomain
+	rdf:type cst:Domain ;
+	cst:domainName "Joint Fires Domain" ;
+	cst:hasAccessTo usecase:JointFiresDomainController ;
+	cst:hasAccessTo usecase:JFT_Computer ;
+	cst:hasAccessTo usecase:JFCC_Computer ;
+	cst:hasAccessTo usecase:C_BTY_HQ_Computer ;
+	cst:hasAccessTo usecase:C_BTY_1TP_Computer ;
+	cst:hasAccessTo usecase:C_BTY_2TP_Computer ;
+	cst:hasAccessTo usecase:C_BTY_3TP_Computer .
+
+usecase:JointFiresDomainController
+	rdf:type cst:DomainController ;
+	cst:hasNic usecase:JFDC_NIC ;
+	cst:controlsDomain usecase:JointFiresDomain .
+
+usecase:JFDC_NIC 
+	rdf:type cst:Nic ;
+	cst:ipAddress "10.10.1.100" ;
+	cst:macAddress "66:55:44:33:22:11" ;
+	cst:isConnectedTo usecase:JFCCNET .	
+
+usecase:JFTNET_Nic
+	rdf:type cst:Nic ;
+	cst:ipAddress "10.10.0.200" ;
+	cst:macAddress "AB:CD:EF:FE:DC:BA" ;
+	cst:isConnectedTo usecase:JFTNET .
+
+usecase:JFCCNET_Nic
+	rdf:type cst:Nic ;
+	cst:ipAddress "10.10.1.200" ;
+	cst:macAddress "12:23:34:45:56:67" ;
+	cst:isConnectedTo usecase:JFCCNET .
+
+usecase:C_BTYNET_Nic
+	rdf:type cst:Nic ;
+	cst:ipAddress "10.10.3.200" ;
+	cst:macAddress "99:11:88:22:77:33" ;
+	cst:isConnectedTo usecase:C_BTYNET .
+
+usecase:AttackerNET_Nic
+	rdf:type cst:Nic ;
+	cst:ipAddress "10.10.66.200" ;
+	cst:macAddress "66:66:66:66:66:66" ;
+	cst:isConnectedTo usecase:AttackerNet .
+
+usecase:ForwardObserver 
+	rdf:type cst:DomainUser ;
+	cst:userID "1" ;
+	cst:username "Forward.Observer" ;
+	cst:password "password1" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .
+
+usecase:JointFirecontroller
+	rdf:type cst:DomainUser ;
+	cst:userID "2" ;
+	cst:username "Joint.Firecontroller" ;
+	cst:password "passw0rd" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .
+
+usecase:BCChraliebattery
+	rdf:type cst:DomainUser ;
+	cst:userID "3" ;
+	cst:username "BC.Charliebattery" ;
+	cst:password "P@ssword" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .
+
+usecase:1Troopcommander
+	rdf:type cst:DomainUser ;
+	cst:userID "4" ;
+	cst:username "1Troop.Commander" ;
+	cst:password "Guns" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .	
+
+usecase:2Troopcommander
+	rdf:type cst:DomainUser ;
+	cst:userID "5" ;
+	cst:username "2Troop.Commander" ;
+	cst:password "BigGuns" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .
+
+usecase:3Troopcommander
+	rdf:type cst:DomainUser ;
+	cst:userID "6" ;
+	cst:username "3Troop.Commander" ;
+	cst:password "GunsForLife" ;
+	cst:userPrivilegeLevel "USER" ;
+	cst:hasAccessTo usecase:JointFiresDomain .		
+
+usecase:S6Admin
+	rdf:type cst:DomainUser ;
+	cst:userID "0" ;
+	cst:username "S6.Admin" ;
+	cst:password "Light.Kitten@Sandal.Stair6557" ;
+	cst:userPrivilegeLevel "ADMINISTRATOR" ;
+	cst:hasAccessTo usecase:JointFiresDomain .		
+
+usecase:JFTNET	
+	rdf:type cst:SubNetwork ;
+	rdfs:label "Joint Fires Team Network"^^xsd:string ;
+	cst:netName "JFTNET" ;
+	cst:hasEdgeNic usecase:JFTNET_Nic .	
+
+usecase:JFT_Laptop
+	rdf:type cst:Computer ;
+	rdf:label "Joint Fires Team Laptop"^^xsd:string ;
+	cst:hostName "JFTLTP" ;
+ 	cst:hasNic usecase:JFT_Laptop_Nic ;
+ 	cst:hasInstalledSoftwareVersion usecase:CallForFireCommsSoftwareV5_7 ;
+ 	cst:hasInstalledSoftwareVersion usecase:TargetingSoftwareV1_5_5 .	
+
+ usecase:JFT_Laptop_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "JFT Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.0.1" ;
+	cst:macAddress "AA:BB:CC:DD:EE:FF" ;
+	cst:isConnectedTo usecase:JFTWAP ;
+	cst:hasVisibleService usecase:CallForFireComms .
+
+usecase:JFTWAP
+	rdf:type cst:WirelessAccessPoint ;
+	rdfs:label "JFT Wireless Access Point" ;
+	cst:ssid "JFT_WIFI" ;
+	cst:hasWirelessSecurityProtocol usecase:WEP .
+
+usecase:WEP 
+	rdf:type cst:WirelessSecurityProtocol ;
+	rdfs:label "WEP Security Protocol" ;
+	cst:wirelessSecurityProtocolType "WEP" ;
+	cst:wirelessSecurityProtocolStrength "WEAK" .
+
+usecase:JFCCNET	
+	rdf:type cst:SubNetwork ;
+	rdfs:label "Joint Fires Communications Centre Network"^^xsd:string ;
+	cst:netName "JFCCNET" ;
+	cst:hasEdgeNic usecase:JFCCNET_Nic .	
+
+usecase:NIDS_JFCCNET
+	rdf:type cst:NetworkIDS ;
+	rdfs:label "Network IDS for the JFCC network" ;
+	cst:hostname "NIDS_JFCC" ;
+	cst:hasInstalledSoftwareVersion usecase:NIDS1_1_1 ;
+	cst:monitorsSubnet usecase:JFCCNET .		
+
+usecase:JFCC_Computer
+	rdf:type cst:Computer ;
+	rdf:label "Joint Fires Communication Centre Computer"^^xsd:string ;
+	cst:hostName "JFCCPC" ;
+ 	cst:hasNic usecase:JFCC_Computer_Nic ;
+ 	cst:hasInstalledSoftwareVersion usecase:MissionControlSoftwareV3_0 ;
+ 	cst:hasInstalledSoftwareVersion usecase:OpenSSL1_0_1 .	
+
+ usecase:JFCC_Computer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "JFCC Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.1.1" ;
+	cst:macAddress "11:22:33:44:55:66" ;
+	cst:isConnectedTo usecase:JFCCNET ;
+	cst:hasVisibleService usecase:MissionController ;
+	cst:hasVisibleService usecase:SSL .
+
+usecase:C_BTYNET
+	rdf:type cst:SubNetwork ;
+	rdfs:label "Charlie Battery Network"^^xsd:string ;
+	cst:netName "C_BTYNET" ;
+	cst:hasEdgeNic usecase:C_BTYNET_Nic .	
+
+usecase:C_BTY_HQ_Computer
+	rdf:type cst:Computer ;
+	rdf:label "Charlie Battery Headquarters Computer"^^xsd:string ;
+	cst:hostName "CBTYQHPC" ;
+	cst:hasDisk usecase:HQ_Disk ;
+ 	cst:hasNic usecase:C_BTY_HQ_Computer_Nic ;
+ 	cst:hasNic usecase:C_BTY_HQ_VPN_Nic ;
+ 	cst:hasInstalledSoftwareVersion usecase:BatteryManagementSoftwareV16_8_8 ;
+ 	cst:hasInstalledSoftwareVersion usecase:OpenSSL1_0_1 ;
+ 	cst:hasInstalledSoftwareVersion usecase:AdobeReader8_1_3 ;
+ 	cst:hasInstalledSoftwareVersion usecase:HIDS1_1_1 .	
+
+ usecase:C_BTY_HQ_Computer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "C BTY HQ Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.3.9" ;
+	cst:macAddress "99:99:99:99:99:99" ;
+	cst:isConnectedTo usecase:C_BTYNET ;
+	cst:hasVisibleService usecase:BatteryManager ;
+	cst:hasVisibleService usecase:SSL .	
+
+usecase:C_BTY_HQ_VPN_Nic 
+	rdf:type cst:VirtualNic ;
+	rdfs:label "Charlie Battery VPN Network Card" ;
+	cst:ipAddress "10.10.1.15" ;
+	cst:macAddress "65:74:83:92:01:EA" ;
+	cst:hasVirtualPrivateNetworkConnection usecase:JFCCNET .
+
+usecase:HQ_Disk
+	rdf:type cst:Disk ;
+	cst:diskSize "1500" ; 
+	cst:volumename "HQ Disk"	;
+	cst:hasData usecase:HQ_Data ;
+	cst:isEncryptedWith usecase:AES .
+
+usecase:HQ_Data 
+	rdf:type cst:Data ;
+	cst:dataSize "100" ;
+	cst:dataType "Battle Plans" ;
+	cst:hasOwner usecase:BCChraliebattery .		
+
+usecase:C_BTY_1TP_Computer
+	rdf:type cst:Computer ;
+	rdf:label "Charlie Battery 1st Troop Computer"^^xsd:string ;
+	cst:hostName "CBTY1TPPC" ;
+ 	cst:hasNic usecase:C_BTY_1TP_Computer_Nic ;
+ 	cst:hasInstalledSoftwareVersion usecase:FireControlSoftwareV2_1 ;
+ 	cst:hasInstalledSoftwareVersion usecase:HIDS1_1_1 .	
+
+ usecase:C_BTY_1TP_Computer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "C BTY 1st Troop Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.3.1" ;
+	cst:macAddress "11:11:11:11:11:11" ;
+	cst:isConnectedTo usecase:C_BTYNET ;
+	cst:hasDisk usecase:1TP_Disk ;
+	cst:hasVisibleService usecase:FireController .	
+
+usecase:1TP_Disk
+	rdf:type cst:Disk ;
+	cst:diskSize "1500" ; 
+	cst:volumename "1 TP Disk"	;
+	cst:hasData usecase:1TP_Data .
+
+usecase:1TP_Data 
+	rdf:type cst:Data ;
+	cst:dataSize "50" ;
+	cst:dataType "Ammunition State" ;
+	cst:hasOwner usecase:1Troopcommander .	
+
+usecase:C_BTY_2TP_Computer
+	rdf:type cst:Computer ;
+	rdf:label "Charlie Battery 2nd Troop Computer"^^xsd:string ;
+	cst:hostName "CBTY2TPPC" ;
+ 	cst:hasNic usecase:C_BTY_2TP_Computer_Nic ;
+ 	cst:hasDisk usecase:2TP_Disk ;
+ 	cst:hasInstalledSoftwareVersion usecase:FireControlSoftwareV2_1 ;
+ 	cst:hasInstalledSoftwareVersion usecase:HIDS1_1_1 .			
+
+ usecase:C_BTY_2TP_Computer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "C BTY 2nd Troop Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.3.2" ;
+	cst:macAddress "22:22:22:22:22:22" ;
+	cst:isConnectedTo usecase:C_BTYNET ;
+	cst:hasVisibleService usecase:FireController .	
+
+usecase:2TP_Disk
+	rdf:type cst:Disk ;
+	cst:diskSize "1500" ; 
+	cst:volumename "2 TP Disk"	;
+	cst:hasData usecase:3TP_Data .
+
+usecase:2TP_Data 
+	rdf:type cst:Data ;
+	cst:dataSize "500" ;
+	cst:dataType "Training Video" ;
+	cst:hasOwner usecase:1Troopcommander .	
+
+usecase:C_BTY_3TP_Computer
+	rdf:type cst:Computer ;
+	rdf:label "Charlie Battery 3rd Troop Computer"^^xsd:string ;
+	cst:hostName "CBTY3TPPC" ;
+ 	cst:hasNic usecase:C_BTY_3TP_Computer_Nic ;
+ 	cst:hasDisk usecase:3TP_Disk ;
+ 	cst:hasInstalledSoftwareVersion usecase:FireControlSoftwareV2_1 ;
+ 	cst:hasInstalledSoftwareVersion usecase:HIDS1_1_1 .			
+
+ usecase:C_BTY_3TP_Computer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "C BTY 3rd Troop Computer Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.3.3" ;
+	cst:macAddress "33:33:33:33:33:33" ;
+	cst:isConnectedTo usecase:C_BTYNET ;
+	cst:hasVisibleService usecase:FireController .	
+
+usecase:3TP_Disk
+	rdf:type cst:Disk ;
+	cst:diskSize "1500" ; 
+	cst:volumename "3 TP Disk"	;
+	cst:hasData usecase:3TP_Data .
+
+usecase:3TP_Data 
+	rdf:type cst:Data ;
+	cst:dataSize "200" ;
+	cst:dataType "Music: Fortunate Son - Creedence Clearwater Revivial" ;
+	cst:hasOwner usecase:3Troopcommander .	
+
+#attackerInfrastructure
+	# EdgneNic Defined above
+	# Routes on router Defined Above	
+
+usecase:AttackerNET
+	rdf:type cst:SubNetwork ;
+	rdfs:label "Attacker  Network"^^xsd:string ;
+	cst:netName "AttackerNet" ;
+	cst:hasEdgeNic usecase:AttackerNET_Nic .		
+
+usecase:AttackerVirtualServer
+	rdf:type cst:Computer ;
+	rdf:label "Attacker Virtual Server"^^xsd:string ;
+	cst:hostName "Attacker vServer" ;
+ 	cst:hasNic usecase:AttackerVirtualServer_Nic ;
+ 	cst:hasNic usecase:AttackerVirtualServer_VirtualNic .
+
+ usecase:AttackerVirtualServer_Nic
+	rdf:type cst:Nic ;
+	rdfs:label "Attacker Virtual Server Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.66.10" ;
+	cst:macAddress "66:66:66:66:66:66" ;
+	cst:isConnectedTo usecase:AttackerNET .
+
+ usecase:AttackerVirtualServer_VirtualNic
+	rdf:type cst:VirtualNic ;
+	rdfs:label "Attacker Virtual Server Virtual Network Card"^^xsd:string ;
+	cst:ipAddress "10.10.77.10" ;
+	cst:macAddress "77:77:77:77:77:77" ;
+	cst:isVirtuallyConnectedTo usecase:AttackerVirtualNetwork .	
+
+usecase:Attacker1_vNic
+	rdf:type cst:VirtualNic ;
+	rdfs:label "Virtual Network card for Attacker 1's Virtual Machine" ;
+	cst:ipAddress "10.10.66.1" ;
+	cst:macAddress "34:76:23:68:34:23" ;
+	cst:isVirtuallyConnectedTo usecase:AttackerVirtualNetwork .	
+	
+usecase:Attacker2_vNic
+	rdf:type cst:VirtualNic ;
+	rdfs:label "Virtual Network card for Attacker 2's Virtual Machine" ;
+	cst:ipAddress "10.10.66.2" ;
+	cst:macAddress "43:67:32:86:43:32" ;
+	cst:isVirtuallyConnectedTo usecase:AttackerVirtualNetwork .	
+
+usecase:Attacker1_VM
+	rdf:type cst:VirtualMachine ;
+	rdf:label "Attacker 1's VM" ;
+	cst:hasVirtualNic usecase:Attacker1_vNic .
+
+usecase:Attacker2_VM
+	rdf:type cst:VirtualMachine ;
+	rdf:label "Attacker2's VM" ;
+	cst:hasVirtualNic usecase:Attacker2_vNic .	
+
+usecase:AttackerVirtualNetwork
+	rdf:type cst:VirtualNetwork ;
+	rdfs:label "Attacker Virtual Network"^^xsd:string ;
+	cst:netName "AttackerNet1" .
+
+
+#Software
+
+usecase:TargetingSoftwareV1_5_5
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:MissionSupportSoftware ;
+	cst:InstalledSoftwareVersionNumber "1_5_5" ;
+	cst:projectsService usecase:TargetingService .
+
+usecase:TargetingService
+	rdf:type cst:LocalService ;
+	cst:servicePrivilegeLevel "USER" .
+
+usecase:CallForFireCommsSoftwareV5_7
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:CommunicationSoftware ;
+	cst:InstalledSoftwareVersionNumber "5_7" ;
+	cst:projectsService usecase:CallForFireComms .
+
+usecase:CallForFireComms
+	rdf:type cst:RemoteService ;
+	cst:servicePrivilegeLevel "USER" ;
+	cst:port "8766" ;
+	cst:protocol "CFFC" .		
+
+usecase:MissionControlSoftwareV3_0
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:MissionSupportSoftware ;
+	cst:InstalledSoftwareVersionNumber "3_0" ;
+	cst:projectsService usecase:MissionController.
+
+usecase:MissionController
+	rdf:type cst:RemoteService ;
+	cst:servicePrivilegeLevel "USER" ;
+	cst:port "7331" ;
+	cst:protocol "MsnC" .
+
+usecase:OpenSSL1_0_1
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:Encryption ;
+	cst:InstalledSoftwareVersionNumber "1_0_1" ;
+	cst:projectsService usecase:SSL;
+	cst:hasVulnerability usecase:Heartbleed ;
+	cst:cpeIdentifier "cpe:2.3:a:openssl:openssl:1.0.1:*:*:*:*:*:*:*" .
+
+usecase:SSL 
+	rdf:type cst:RemoteService ;
+	cst:port "443" ;
+	cst:protocol "SSL" ;
+	cst:servicePrivilegeLevel "USER" .
+
+usecase:BatteryManagementSoftwareV16_8_8
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:MissionSupportSoftware ;
+	cst:InstalledSoftwareVersionNumber "16_8_8" ;
+	cst:projectsService usecase:BatteryManager.
+
+usecase:BatteryManager
+	rdf:type cst:RemoteService ;
+	cst:servicePrivilegeLevel "USER" ;
+	cst:port "8765" ;
+	cst:protocol "BTYMan" ;
+	cst:hasVisibleService usecase:C_BTY_HQ_Computer_Nic .
+
+usecase:FireControlSoftwareV2_1
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:isSoftwareType usecase:MissionSupportSoftware ;
+	cst:InstalledSoftwareVersionNumber "2_1" ;
+	cst:projectsService usecase:FireController .
+
+usecase:FireController
+	rdf:type cst:RemoteService ;
+	cst:servicePrivilegeLevel "USER" ;
+	cst:port "161616" ;
+	cst:protocol "FireMan" .	
+
+usecase:NIDS_1_1_1
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:hasSoftwareConfiguration usecase:NIDS_Rule_1 ;
+	cst:projectsService usecase:SRV_NIDS .
+
+usecase:SRV_NIDS
+	rdf:type cst:LocalService ;
+	cst:servicePrivilegeLevel "ADMINISTRATOR" .
+
+usecase:NIDS_Rule_1
+	rdf:type cst:IdsRule ;
+	cst:ruleNumber "NIDS_01" ;
+	cst:idsSignature "NETWORK SOMETHING" ;
+	cst:idsAction "IGNORE" .		
+
+usecase:HIDS1_1_1
+	rdf:type cst:hasInstalledSoftwareVersion ;
+	cst:hasSoftwareConfiguration usecase:AdobeBufferOverflowWarning ;
+	cst:isSoftwareType usecase:HIDS .
+
+usecase:HIDS
+	rdf:type cst:SoftwareType	;
+	cst:softwareName "HostIDS".
+
+usecase:AdobeBufferOverflowWarning 
+	rdf:type cst:IdsRule ;
+	cst:ruleNumber "HIDS_01" ;
+	cst:idsSignature "CVE-2009-0927" ;
+	cst:idsAction "ALERT" .
+
+usecase:AdobeReader8_1_3
+	rdf:type cst:InstalledSoftwareVersion ;
+	cst:hasVulnerability usecase:AdobeBufferOverflow ;
+	cst:projectsService usecase:AdobeReader .
+
+usecase:AdobeBufferOverflow
+	rdf:type cst:SoftwareVulnerability ;
+	cst:cveIdentifier "CVE-2009-0927" ;
+	cst:cvssScore "9" ;
+	cst:cvssExploitablityScore "8" .
+
+usecase:InputValidation 
+	rdf:type cst:SoftwareWeakness ;
+	cst:cweIdentifier "CWE-20" ;
+	cst:includesVulnerability usecase:AdobeBufferOverflow .			
+
+### Elements that are not associated with a particular area; analytic elements. 	
+
+usecase:CommunicationSoftware
+	rdf:type cst:SoftwareType .
+
+usecase:MissionSupportSoftware
+	rdf:type cst:SoftwareType .	
+
+usecase:Encryption
+	rdf:type cst:Software ;
+	cst:SoftwareName "OpenSSL" .	
+
+# Vulnerabilities and weaknesses (Will be pre-generated and bulk stored externally)
+
+usecase:Heartbleed 
+	rdf:type cst:SoftwareVulnerability ;
+	cst:cveIdentifier "CVE-2014-0160" ;
+	cst:cvssScore "5" ;
+	cst:cvssExploitabilityScore "10" .
+
+usecase:FailureToConstrainOperationsWithinTheBoundsOfAMemeoryBuffer 
+	rdf:type cst:SoftwareWeakness ;
+	cst:cweIdentifier "119" ;
+	cst:includesVulnerability usecase:Heartbleed .
+
+
+#TSO Elements
+
+usecase:3rdCyberWarfareSection
+	rdf:type org:ThreatOrganisation ;
+	rdfs:label "3rd Cyber Warfare Section" ;
+	org:organisationName "3rd Cyber Warfare Section" ;
+	org:primaryMotivation "ORDERS" .
+
+usecase:ExerciseRedTeam01
+	rdf:type tso:Campaign ;
+	rdfs:label "Excercise Red Team 01" ;
+	tso:campaignTitle "ExerciseRedTeam01" ;
+	tso:campaignDescription "A Red Team Exercised designed by the JTF Commander to test the capabilities of the Joint Fires Network" ;
+	tso:campaignIntendedEffect "Discover Vulnerabilities" ;
+	ceso:portkey_tso-org_Campaign-ThreatOrganisation usecase:3rdCyberWarfareSection .
+
+usecase:Attacker1 
+	rdf:type tso:ThreatActor ;
+	rdfs:label "Attacker 1" ;
+	tso:threatActorTitle "Attacker1_3CWSSeco" ;
+	tso:threatActorDescription "The section commander of the 3rd Cyber Warfare Section" ;
+	tso:threatActorType "Military" ;
+	tso:thratActorSkillLevel "1" ;
+	tso:threatActorMotivation "ORDERS" ;
+	tso:usesExploit usecase:HeartbleedExploit ;
+	ceso:portkey_tso-org_ThreatActor-ThreatOrganisation usecase:3rdCyberWarfareSection .
+
+
+usecase:Attacker2
+	rdf:type tso:ThreatActor ;
+	rdfs:label "Attacker 2" ;
+	tso:threatActorTitle "Attacker2_3CWSSeco" ;
+	tso:threatActorDescription "A member of the 3rd Cyber Warfare Section" ;
+	tso:threatActorType "Military" ;
+	tso:thratActorSkillLevel "9" ;
+	tso:threatActorMotivation "ORDERS" ;
+	tso:usesExploit usecase:HeartbleedExploit ;
+	ceso:portkey_tso-org_ThreatActor-ThreatOrganisation usecase:3rdCyberWarfareSection .
+
+usecase:HeartbleedExploit 
+	rdf:type tso:Exploit ;
+	rdfs:label "Heartbleed Exploit " ;
+	tso:exploitTitle "Heartbleed Exploit" ;
+	tso:exploitDescription "Compromises the heartbleed vulnerability in openSSL" ;
+	tso:exploitEffect "Intercept Communications" ;
+	tso:requiredSkillLevel "10" ;
+	tso:targets usecase:JFCCTarget ;
+	tso:preventativeCourseOfAction usecase:UpdateOpenSSL ;
+	ceso:portkey_tso-ceso_Exploit-CyberEffect ceso:InterceptEffect .
+
+usecase:JFCCTarget 
+	rdf:type tso:ExploitTarget ;
+	rdfs:label "JFCC Target" ;
+	tso:exploitTargetTitle "JFCC Target" ;
+	tso:exploitTargetDescription "Targeting the known openSSL vulnerability on the JFCC computer system" ;
+	tso:protectiveCourseOfAction usecase:UpdateOpenSSL ;
+	ceso:portkey_tso-cst_ExploitTarget-SoftwareVulnerability usecase:Heartbleed .
+
+usecase:UpdateOpenSSL
+	rdf:type tso:CourseOfAction ;
+	rdfs:label "Update Open SSL" ;
+	tso:courseOfActionTitle "Update OpenSSL" ;
+	tso:courseOfActionDescription "Update OpenSSL to remove teh heartbleed vulnerability" ;
+	tso:courseOfActionObjective "Patch Heartbleed Vulnerability" ;
+	tso:courseOfActionImpact "MEDIUM" ;
+	tso:courseOfActionEfficacy "MEDIUM" .
+
+usecase:HeartbleedExploitedIncident
+	rdf:type event:Incident ;
+	rdfs:label "Heartbleed Vulnerability Exploited Incident" ;
+	event:incidentId "INC_0001" ;
+	event:incidentSeverity "4" ;
+	event:incidentDuration "0" ;
+	event:incidentTitle "Heartbleed Vulnerability Exploited" ;
+	event:incidentDescription "At 10am on the JFCC watchkeeper computer an attacker successfully compromised the encrypted communications between C Bty HQ and the Watchkeepers computer" ;
+	ceso:portkey_event-tso_Incident-Exploit usecase:HeartbleedExploit ;
+	ceso:portkey_event-tso_Incident-COA usecase:UpdateOpenSSL ;
+	ceso:portkey_event-cst_Incident-Node usecase:JFCC_Computer .
+
+					
